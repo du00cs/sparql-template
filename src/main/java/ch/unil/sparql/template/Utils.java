@@ -30,7 +30,9 @@ public class Utils {
     public static Map<String, String> dbpediaPrefixMap(){
         return MapUtils.putAll(new HashMap<>(),
                 new String[]{"dbr", "http://dbpedia.org/resource/",
-                        "dbp", "http://dbpedia.org/property/"});
+                        "dbp", "http://dbpedia.org/property/",
+                        "dbo", "http://dbpedia.org/ontology/",
+                });
     }
 
 }

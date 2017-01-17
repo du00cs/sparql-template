@@ -36,6 +36,7 @@ public class RdfMappingContext extends AbstractMappingContext<RdfEntity<?>, RdfP
     @Override
     protected RdfProperty createPersistentProperty(Field field, PropertyDescriptor descriptor, RdfEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
         logger.debug("Creating RDF property for field {} of type {}", field.getName(), owner.getType().getSimpleName());
+
         return new RdfProperty(field, descriptor, owner, simpleTypeHolder);
     }
 }

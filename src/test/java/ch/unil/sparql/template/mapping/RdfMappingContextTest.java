@@ -3,6 +3,8 @@ package ch.unil.sparql.template.mapping;
 import ch.unil.sparql.template.Utils;
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.PrefixMap;
+import ch.unil.sparql.template.annotation.Relation;
+import ch.unil.sparql.template.bean.Country;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.jena.shared.PrefixMapping;
 import org.junit.Test;
@@ -35,6 +37,20 @@ public class RdfMappingContextTest {
     }
 
     public static class Person5 {
+
+    }
+
+    public static class Person6 {
+
+        @Relation
+        private Country citizenship;
+
+        public Country getCitizenship() {
+            return citizenship;
+        }
+    }
+
+    public static class Country1 {
 
     }
 
@@ -80,6 +96,16 @@ public class RdfMappingContextTest {
                 .setNsPrefixes(Collections.singletonMap("foo", "http://foobar")));
         final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person5.class);
         assertThat(entity.getPrefixMap().getNsPrefixMap()).contains(new MutablePair<>("foo", "http://foobar"));
+    }
+
+    @Test
+    public void testRelation() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person6.class);
+        final RdfProperty citizenship = entity.getPersistentProperty("citizenship");
+        assertThat(citizenship.isAssociation()).isTrue();
+        assertThat(citizenship.isEntity()).isTrue();
+        assertThat(citizenship.isCollectionLike()).isFalse();
     }
 
 }

@@ -1,8 +1,10 @@
 package ch.unil.sparql.template.bean;
 
 import ch.unil.sparql.template.annotation.Predicate;
+import ch.unil.sparql.template.annotation.Relation;
 
 import java.util.Date;
+
 
 public class Person {
 
@@ -12,6 +14,10 @@ public class Person {
     @Predicate("dbp")
     private Date birthDate;
 
+    @Predicate("dbo")
+    @Relation
+    private Country citizenship;
+
     public String getBirthName() {
         return birthName;
     }
@@ -20,4 +26,7 @@ public class Person {
         return birthDate;
     }
 
+    public Country getCitizenship() {
+        return citizenship;
+    }
 }

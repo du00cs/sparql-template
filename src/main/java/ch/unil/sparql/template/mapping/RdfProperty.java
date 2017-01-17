@@ -16,17 +16,24 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     private Predicate predicateAnnot;
 
+    private SimpleTypeHolder simpleTypeHolder;
+
     public RdfProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, RdfProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        predicateAnnot = findAnnotation(Predicate.class);
+        this.predicateAnnot = findAnnotation(Predicate.class);
+        this.simpleTypeHolder = simpleTypeHolder;
     }
 
     @Override
     protected Association<RdfProperty> createAssociation() {
-        return null;
+        return new Association<>(this, null);
     }
 
     public String getPrefix() {
         return predicateAnnot.value();
+    }
+
+    public boolean isSimpleProperty() {
+        return !isTransient() && !isVersionProperty() && !isEntity() && !isAssociation() && !isCollectionLike() && !isArray() && !isMap();
     }
 }
