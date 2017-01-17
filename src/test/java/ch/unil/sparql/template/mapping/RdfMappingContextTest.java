@@ -1,9 +1,13 @@
 package ch.unil.sparql.template.mapping;
 
+import ch.unil.sparql.template.Utils;
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.PrefixMap;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.jena.shared.PrefixMapping;
 import org.junit.Test;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -28,6 +32,10 @@ public class RdfMappingContextTest {
 
         @Predicate("dbp")
         private String birthName;
+    }
+
+    public static class Person5 {
+
     }
 
     @Test
@@ -64,6 +72,14 @@ public class RdfMappingContextTest {
         final RdfProperty birthNameProperty = entity.getPersistentProperty("birthName");
         assertThat(birthNameProperty).isNotNull();
         assertThat(birthNameProperty.getPrefix()).isEqualTo("dbp");
+    }
+
+    @Test
+    public void testInitializePrefixMap() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext(Utils.defaultPrefixMap()
+                .setNsPrefixes(Collections.singletonMap("foo", "http://foobar")));
+        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person5.class);
+        assertThat(entity.getPrefixMap().getNsPrefixMap()).contains(new MutablePair<>("foo", "http://foobar"));
     }
 
 }

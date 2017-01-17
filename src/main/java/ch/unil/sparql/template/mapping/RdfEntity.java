@@ -17,17 +17,17 @@ public class RdfEntity<T> extends BasicPersistentEntity<T, RdfProperty> {
 
     private PrefixMap prefixMapAnnot;
 
-    public RdfEntity(TypeInformation<T> information) {
+    public RdfEntity(TypeInformation<T> information, PrefixMapping prefixMap) {
         super(information);
         this.prefixMapAnnot = findAnnotation(PrefixMap.class);
+        this.prefixMap = prefixMap;
     }
 
     @Override
     public void verify() {
         super.verify();
 
-        // construct value map from provided annotations
-        prefixMap = Utils.defaultPrefixMap();
+        // record prefix map if specified for this entity
         if (prefixMapAnnot != null) {
             prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(), prefixMapAnnot.value()));
         }

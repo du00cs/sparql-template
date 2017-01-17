@@ -2,15 +2,17 @@ package ch.unil.sparql.template;
 
 import ch.unil.sparql.template.bean.Person;
 import ch.unil.sparql.template.query.SparqlQueryService;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.jena.datatypes.xsd.impl.XSDDateType;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -36,7 +38,7 @@ public class SparqlTemplateTest {
                                 NodeFactory.createLiteral("Angelina Jolie Voight", "en"))
                 ));
 
-        final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService);
+        final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService, Utils.dbpediaPrefixMap());
         final Person person = sparqlTemplate.load("dbr:Angelina_Jolie", Person.class);
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
         assertThat(person.getBirthDate()).hasYear(1975).hasMonth(Calendar.JUNE + 1).hasDayOfMonth(4);

@@ -15,19 +15,10 @@ public class SparqlTemplateTestIT {
 
     @Test
     public void testLoadAngelina() throws Exception {
-        final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql");
+        final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql", Utils.dbpediaPrefixMap());
         final Person person = sparqlTemplate.load("dbr:Angelina_Jolie", Person.class);
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
         assertThat(person.getBirthDate()).hasYear(1975).hasMonth(Calendar.JUNE + 1).hasDayOfMonth(4);
-        final GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(person.getBirthDate());
-        System.out.println(calendar.get(Calendar.DAY_OF_WEEK));
-    }
-    @Test
-    public void testLoadBrad() throws Exception {
-        final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql");
-        final Person person = sparqlTemplate.load("dbr:Brad_Pitt", Person.class);
-        System.out.println(person.getBirthDate());
         final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(person.getBirthDate());
         System.out.println(calendar.get(Calendar.DAY_OF_WEEK));

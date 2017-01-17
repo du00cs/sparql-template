@@ -13,6 +13,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author gushakov
@@ -27,11 +29,19 @@ public class SparqlTemplate {
         this(new SparqlQueryService(endpoint, true));
     }
 
+    public SparqlTemplate(String endpoint, Map<String, String> prefixMap) {
+        this(new SparqlQueryService(endpoint, true), prefixMap);
+    }
+
     public SparqlTemplate(SparqlQueryService queryService) {
+        this(queryService, Collections.emptyMap());
+    }
+
+    public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap) {
         this.queryService = queryService;
         conversionService = new DefaultConversionService();
         ((DefaultConversionService) conversionService).addConverter(new RdfJavaConverter());
-        mappingContext = new RdfMappingContext();
+        mappingContext = new RdfMappingContext(Utils.defaultPrefixMap().setNsPrefixes(prefixMap));
     }
 
     public <T> T load(String iri, Class<T> type) {
