@@ -31,8 +31,8 @@ public class ConversionServiceTest {
                 .isEqualTo("foobar");
         assertThat(conversionService.convert(NodeFactory.createLiteral("123", XSDBaseStringType.XSDint), Object.class))
                 .isEqualTo(new Integer(123));
-        assertThat(conversionService.convert(NodeFactory.createLiteral("ça va", "fr"), Object.class))
-                .isEqualTo("ça va");
+        assertThat(conversionService.convert(NodeFactory.createLiteral("Ã§a va", "fr"), Object.class))
+                .isEqualTo("Ã§a va");
     }
 
 }
