@@ -14,5 +14,7 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Persistent
 public @interface Predicate {
+    public static final String DEFAULT_LOCAL_NAME = "";
     String value() default "";
+    String localName() default DEFAULT_LOCAL_NAME;
 }

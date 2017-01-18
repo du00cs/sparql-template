@@ -64,7 +64,7 @@ public class SparqlTemplateTest {
         final Country citizenship = person.getCitizenship();
         assertThat(citizenship instanceof DynamicBeanProxy).isTrue();
         assertThat(citizenship.getCommonName()).isEqualTo("Cambodia");
-        assertThat(person.getSpouse()).containsOnly(1996, 1999, 2000, 2003, 2014);
+        assertThat(person.getYearsMarried()).containsOnly(1996, 1999, 2000, 2003, 2014);
     }
 
 }

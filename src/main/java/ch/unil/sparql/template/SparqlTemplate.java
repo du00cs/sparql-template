@@ -118,7 +118,7 @@ public class SparqlTemplate {
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() != 1) {
             throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
-                    iri + " and property " + inverseProperty.getName() + " with prefix " + inverseProperty.getPrefix() +
+                    iri + " and property " + inverseProperty + " with prefix " + inverseProperty.getPrefix() +
                     ". But found " + matchingTriples.size());
         }
 
@@ -126,7 +126,7 @@ public class SparqlTemplate {
         final Node objectNode = triple.getObject();
 
         if (!objectNode.isURI()) {
-            throw new IllegalStateException("Expecting object node to be an URI node for association (inverse) property " + inverseProperty.getName() +
+            throw new IllegalStateException("Expecting object node to be an URI node for association (inverse) property " + inverseProperty +
                     ". But was " + objectNode);
         }
 

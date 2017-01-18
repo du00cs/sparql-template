@@ -20,8 +20,8 @@ public class Person {
     @Predicate(DBP)
     private ZonedDateTime birthDate;
 
-    @Predicate(DBP)
-    private Collection<Integer> spouse;
+    @Predicate(value = DBP, localName = "spouse")
+    private Collection<Integer> yearsMarried;
 
     @Predicate(DBO)
     @Relation
@@ -35,8 +35,8 @@ public class Person {
         return birthDate;
     }
 
-    public Collection<Integer> getSpouse() {
-        return spouse;
+    public Collection<Integer> getYearsMarried() {
+        return yearsMarried;
     }
 
     public Country getCitizenship() {

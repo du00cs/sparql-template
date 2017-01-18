@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
  */
 public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> {
 
-    private Predicate predicateAnnot;
+    private Predicate annot;
 
     private SimpleTypeHolder simpleTypeHolder;
 
@@ -25,9 +25,9 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     public RdfProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, RdfProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        this.predicateAnnot = findAnnotation(Predicate.class);
+        this.annot = findAnnotation(Predicate.class);
         this.simpleTypeHolder = simpleTypeHolder;
-        this.prefixMap = ((RdfEntity<?>)owner).getPrefixMap();
+        this.prefixMap = ((RdfEntity<?>) owner).getPrefixMap();
         this.isTransient = super.isTransient() || !isAnnotationPresent(Predicate.class);
     }
 
@@ -37,23 +37,24 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
     }
 
     public String getPrefix() {
-        return predicateAnnot.value();
+        return annot.value();
     }
 
-    public String getQName(){
-        return prefixMap.expandPrefix(getPrefix() + ":" + getName());
+    public String getQName() {
+        return prefixMap.expandPrefix(getPrefix() + ":" +
+                (annot.localName().equals(Predicate.DEFAULT_LOCAL_NAME) ? getName() : annot.localName()));
     }
 
     public boolean isSimpleProperty() {
         return !isTransient() && !isVersionProperty() && !isEntity() && !isAssociation() && !isCollectionLike() && !isArray() && !isMap();
     }
 
-    public boolean isCollectionOfSimple(){
+    public boolean isCollectionOfSimple() {
         return isCollectionLike() && simpleTypeHolder.isSimpleType(getActualType());
     }
 
-    public boolean isCollectionOfEntities(){
-       return isCollectionLike() && isEntity();
+    public boolean isCollectionOfEntities() {
+        return isCollectionLike() && isEntity();
     }
 
     @Override

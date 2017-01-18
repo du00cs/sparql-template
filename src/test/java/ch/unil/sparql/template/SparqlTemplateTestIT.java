@@ -3,9 +3,6 @@ package ch.unil.sparql.template;
 import ch.unil.sparql.template.bean.Person;
 import org.junit.Test;
 
-import java.time.ZonedDateTime;
-import java.util.Collections;
-
 import static ch.unil.sparql.template.Prefixes.DBR;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +18,7 @@ public class SparqlTemplateTestIT {
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
         assertThat(person.getBirthDate().getYear()).isEqualTo(1975);
         assertThat(person.getCitizenship().getCommonName()).isEqualTo("Cambodia");
-        assertThat(person.getSpouse()).containsOnly(1996, 1999, 2000, 2003, 2014);
+        assertThat(person.getYearsMarried()).containsOnly(1996, 1999, 2000, 2003, 2014);
     }
 
 }
