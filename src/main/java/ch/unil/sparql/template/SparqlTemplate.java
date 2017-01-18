@@ -73,7 +73,12 @@ public class SparqlTemplate {
         // process associations
         entity.doWithAssociations((Association<RdfProperty> association) -> {
 
-            if (!association.getInverse().isCollectionLike()) {
+            if (association.getInverse().isCollectionOfEntities()) {
+                // multiple entities relation
+                loadCollectionOfEntities(iri, triples, entity, association, propertyAccessor);
+            }
+            else {
+                // single entity relation
                 loadAssociation(iri, triples, entity, association, propertyAccessor);
             }
 
@@ -88,10 +93,14 @@ public class SparqlTemplate {
         final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty, entity.getPrefixMap());
 
         // there must be exactly one triple with matching predicate
-        if (matchingTriples.size() != 1) {
+        if (matchingTriples.size() == 0) {
+            return;
+
+/*
             throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
                     iri + " and property " + rdfProperty + " with prefix " + rdfProperty.getPrefix() +
                     ". But found " + matchingTriples.size());
+*/
         }
 
         final Triple triple = matchingTriples.iterator().next();
@@ -117,18 +126,16 @@ public class SparqlTemplate {
 
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() != 1) {
+            return;
+/*
             throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
                     iri + " and property " + inverseProperty + " with prefix " + inverseProperty.getPrefix() +
                     ". But found " + matchingTriples.size());
+*/
         }
 
         final Triple triple = matchingTriples.iterator().next();
         final Node objectNode = triple.getObject();
-
-        if (!objectNode.isURI()) {
-            throw new IllegalStateException("Expecting object node to be an URI node for association (inverse) property " + inverseProperty +
-                    ". But was " + objectNode);
-        }
 
         propertyAccessor.setProperty(inverseProperty, load(objectNode.getURI(), inverseProperty.getType()));
     }
@@ -144,19 +151,12 @@ public class SparqlTemplate {
 
             final Node objectNode = triple.getObject();
 
-            // object must be a literal Node
-            if (!objectNode.isLiteral()) {
-                throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to the value set of property " + rdfProperty +
-                        ". But was " + objectNode + (objectNode.isURI() ? " (a URI node)." : ""));
-            }
-
             // convert to Java and store in the value set
             valueSet.add(rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
 
         }
 
         // cast the collection to the required type
-
         CollectionUtils.transform(valueSet, new Transformer<Object, Object>() {
             @Override
             public Object transform(Object input) {
@@ -166,6 +166,23 @@ public class SparqlTemplate {
 
 
         propertyAccessor.setProperty(rdfProperty, valueSet);
+    }
+
+    private void loadCollectionOfEntities(String iri, Collection<Triple> triples, RdfEntity<?> entity, Association<RdfProperty> association,
+                                          PersistentPropertyAccessor propertyAccessor){
+
+        final RdfProperty inverseProperty = association.getInverse();
+
+        // get all triples where the predicate matches the property
+        final Collection<Triple> matchingTriples = filterForProperty(triples, inverseProperty, entity.getPrefixMap());
+
+        final Set<DynamicBeanProxy> proxies = new HashSet<>();
+
+        for (final Triple triple : matchingTriples){
+            proxies.add((DynamicBeanProxy)load(triple.getObject().getURI(), inverseProperty.getActualType()));
+        }
+
+        propertyAccessor.setProperty(inverseProperty, proxies);
     }
 
     private <T> T createDynamicProxy(String iri, Class<T> beanType, RdfEntity<?> entity) {
@@ -193,7 +210,7 @@ public class SparqlTemplate {
                     if (predicateUri.equals(rdfProperty.getQName())) {
 
                         // for relation
-                        if (rdfProperty.isEntity()) {
+                        if (rdfProperty.isEntity() || rdfProperty.isCollectionOfEntities()) {
                             // check that the object is a URI node
                             return triple.getObject().isURI();
                         }

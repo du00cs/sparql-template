@@ -27,6 +27,10 @@ public class Person {
     @Relation
     private Country citizenship;
 
+    @Predicate(DBP)
+    @Relation
+    private Collection<Person> spouse;
+
     public String getBirthName() {
         return birthName;
     }
@@ -41,5 +45,9 @@ public class Person {
 
     public Country getCitizenship() {
         return citizenship;
+    }
+
+    public Collection<Person> getSpouse() {
+        return spouse;
     }
 }

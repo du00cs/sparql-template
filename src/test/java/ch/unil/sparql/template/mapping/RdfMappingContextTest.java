@@ -50,6 +50,7 @@ public class RdfMappingContextTest {
     @Rdf
     public static class Person6 {
 
+        @Predicate
         @Relation
         private Country1 citizenship;
 
