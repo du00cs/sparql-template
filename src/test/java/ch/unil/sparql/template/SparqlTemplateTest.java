@@ -3,15 +3,18 @@ package ch.unil.sparql.template;
 import ch.unil.sparql.template.bean.Country;
 import ch.unil.sparql.template.bean.Person;
 import ch.unil.sparql.template.query.SparqlQueryService;
-import org.apache.jena.datatypes.xsd.impl.XSDDateType;
-import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Triple;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Calendar;
 
+import static ch.unil.sparql.template.Prefixes.DBO_NS;
+import static ch.unil.sparql.template.Prefixes.DBP_NS;
+import static ch.unil.sparql.template.Prefixes.DBR;
+import static ch.unil.sparql.template.Prefixes.DBR_NS;
+import static ch.unil.sparql.template.Utils.triple;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.endsWith;
@@ -29,27 +32,19 @@ public class SparqlTemplateTest {
         // :Angelina_Jolie
         when(mockQueryService.query(endsWith("Angelina_Jolie"), any()))
                 .thenReturn(Arrays.asList(
-                        Triple.create(NodeFactory.createURI("http://dbpedia.org/resource/Angelina_Jolie"),
-                                NodeFactory.createURI("http://dbpedia.org/property/birthDate"),
-                                NodeFactory.createLiteral("1975-06-04", XSDDateType.XSDdate)),
-                        Triple.create(NodeFactory.createURI("http://dbpedia.org/resource/Angelina_Jolie"),
-                                NodeFactory.createURI("http://dbpedia.org/property/birthName"),
-                                NodeFactory.createLiteral("Angelina Jolie Voight", "en")),
-                        Triple.create(NodeFactory.createURI("http://dbpedia.org/resource/Angelina_Jolie"),
-                                NodeFactory.createURI("http://dbpedia.org/ontology/citizenship"),
-                                NodeFactory.createURI("http://dbpedia.org/resource/Cambodia"))
+                        triple(DBR_NS + "Angelina_Jolie", DBP_NS + "birthDate", "1975-06-04", XSDDatatype.XSDdate),
+                        triple(DBR_NS + "Angelina_Jolie", DBP_NS + "birthName", "Angelina Jolie Voight", "en"),
+                        triple(DBR_NS + "Angelina_Jolie", DBO_NS + "citizenship", DBR_NS + "Cambodia")
                 ));
 
         // :Cambodia
         when(mockQueryService.query(endsWith("Cambodia"), any()))
                 .thenReturn(Arrays.asList(
-                        Triple.create(NodeFactory.createURI("http://dbpedia.org/resource/Cambodia"),
-                                NodeFactory.createURI("http://dbpedia.org/property/commonName"),
-                                NodeFactory.createLiteral("Cambodia", "en"))
+                        triple(DBR_NS + "Cambodia", DBP_NS + "commonName", "Cambodia", "en")
                 ));
 
-        final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService, Utils.dbpediaPrefixMap());
-        final Person person = sparqlTemplate.load("dbr:Angelina_Jolie", Person.class);
+        final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService);
+        final Person person = sparqlTemplate.load(DBR + ":Angelina_Jolie", Person.class);
         assertThat(person instanceof DynamicBeanProxy).isTrue();
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
         assertThat(person.getBirthDate()).hasYear(1975).hasMonth(Calendar.JUNE + 1).hasDayOfMonth(4);

@@ -98,8 +98,8 @@ public class SparqlTemplate {
 
         // object must be a literal Node
         if (!objectNode.isLiteral()) {
-            throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to property " + rdfProperty +
-                    ". But was " + objectNode);
+            throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to property " + rdfProperty.getName() +
+                    ". But was " + objectNode + (objectNode.isURI()?" (a URI node).":""));
         }
 
         // convert to Java and assign to the property

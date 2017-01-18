@@ -5,16 +5,19 @@ import ch.unil.sparql.template.annotation.Relation;
 
 import java.util.Date;
 
+import static ch.unil.sparql.template.Prefixes.DBO;
+import static ch.unil.sparql.template.Prefixes.DBP;
+
 
 public class Person {
 
-    @Predicate("dbp")
+    @Predicate(DBP)
     private String birthName;
 
-    @Predicate("dbp")
+    @Predicate(DBP)
     private Date birthDate;
 
-    @Predicate("dbo")
+    @Predicate(DBO)
     @Relation
     private Country citizenship;
 

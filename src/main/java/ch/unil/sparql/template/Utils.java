@@ -1,11 +1,15 @@
 package ch.unil.sparql.template;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 
 import java.util.HashMap;
-import java.util.Map;
+
+import static ch.unil.sparql.template.Prefixes.*;
 
 /**
  * @author gushakov
@@ -15,24 +19,40 @@ public class Utils {
     public static PrefixMapping defaultPrefixMap() {
 
         final PrefixMapping prefixMap = new PrefixMappingImpl();
-
-        prefixMap.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-        prefixMap.setNsPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        prefixMap.setNsPrefix("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-        prefixMap.setNsPrefix("foaf", "http://xmlns.com/foaf/0.1/");
-        prefixMap.setNsPrefix("dc", "http://purl.org/dc/elements/1.1/");
-        prefixMap.setNsPrefix("owl", "http://www.w3.org/2002/07/owl#");
+        prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(),
+                new String[]{
+                        XSD, XSD_NS,
+                        RDF, RDF_NS,
+                        RDFS, RDF_NS,
+                        FOAF, FOAF_NS,
+                        DC, DC_NS,
+                        OWL, OWL_NS,
+                        DBR, DBR_NS,
+                        DBP, DBP_NS,
+                        DBO, DBO_NS
+                }));
 
         return prefixMap;
 
     }
 
-    public static Map<String, String> dbpediaPrefixMap(){
-        return MapUtils.putAll(new HashMap<>(),
-                new String[]{"dbr", "http://dbpedia.org/resource/",
-                        "dbp", "http://dbpedia.org/property/",
-                        "dbo", "http://dbpedia.org/ontology/",
-                });
+    public static Triple triple(String sUri, String pUri, String oUri){
+         return Triple.create(NodeFactory.createURI(sUri),
+                 NodeFactory.createURI(pUri),
+                 NodeFactory.createURI(oUri));
+    }
+
+    public static Triple triple(String sUri, String pUri, String oLexical, XSDDatatype oType){
+        return Triple.create(NodeFactory.createURI(sUri),
+                NodeFactory.createURI(pUri),
+                NodeFactory.createLiteral(oLexical, oType));
+
+    }
+
+    public static Triple triple(String sUri, String pUri, String oLexical, String oLang){
+        return Triple.create(NodeFactory.createURI(sUri),
+                NodeFactory.createURI(pUri),
+                NodeFactory.createLiteral(oLexical, oLang));
     }
 
 }
