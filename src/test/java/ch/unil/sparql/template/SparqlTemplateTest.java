@@ -7,8 +7,8 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.time.Month;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import static ch.unil.sparql.template.Prefixes.DBO_NS;
 import static ch.unil.sparql.template.Prefixes.DBP_NS;
@@ -30,28 +30,41 @@ public class SparqlTemplateTest {
         final SparqlQueryService mockQueryService = Mockito.mock(SparqlQueryService.class);
 
         // :Angelina_Jolie
+        final String personIri = DBR_NS + "Angelina_Jolie";
+        final String countryIri = DBR_NS + "Cambodia";
         when(mockQueryService.query(endsWith("Angelina_Jolie"), any()))
                 .thenReturn(Arrays.asList(
-                        triple(DBR_NS + "Angelina_Jolie", DBP_NS + "birthDate", "1975-06-04", XSDDatatype.XSDdate),
-                        triple(DBR_NS + "Angelina_Jolie", DBP_NS + "birthName", "Angelina Jolie Voight", "en"),
-                        triple(DBR_NS + "Angelina_Jolie", DBO_NS + "citizenship", DBR_NS + "Cambodia")
+                        triple(personIri, DBP_NS + "birthDate", "1975-06-04", XSDDatatype.XSDdate),
+                        triple(personIri, DBP_NS + "birthName", "Angelina Jolie Voight", "en"),
+                        triple(personIri, DBO_NS + "citizenship", countryIri),
+                        triple(personIri, DBP_NS + "spouse", "1996", XSDDatatype.XSDinteger),
+                        triple(personIri, DBP_NS + "spouse", "1999", XSDDatatype.XSDinteger),
+                        triple(personIri, DBP_NS + "spouse", "2000", XSDDatatype.XSDinteger),
+                        triple(personIri, DBP_NS + "spouse", "2003", XSDDatatype.XSDinteger),
+                        triple(personIri, DBP_NS + "spouse", "2014", XSDDatatype.XSDinteger),
+                        triple(personIri, DBP_NS + "spouse", "div.", "en"),
+                        triple(personIri, DBP_NS + "spouse", DBR_NS + "Billy_Bob_Thornton"),
+                        triple(personIri, DBP_NS + "spouse", DBR_NS + "Jonny_Lee_Miller"),
+                        triple(personIri, DBP_NS + "spouse", DBR_NS + "Brad_Pitt")
                 ));
 
         // :Cambodia
         when(mockQueryService.query(endsWith("Cambodia"), any()))
                 .thenReturn(Arrays.asList(
-                        triple(DBR_NS + "Cambodia", DBP_NS + "commonName", "Cambodia", "en")
+                        triple(countryIri, DBP_NS + "commonName", "Cambodia", "en")
                 ));
 
         final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService);
         final Person person = sparqlTemplate.load(DBR + ":Angelina_Jolie", Person.class);
         assertThat(person instanceof DynamicBeanProxy).isTrue();
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
-        assertThat(person.getBirthDate()).hasYear(1975).hasMonth(Calendar.JUNE + 1).hasDayOfMonth(4);
+        assertThat(person.getBirthDate().getYear()).isEqualTo(1975);
+        assertThat(person.getBirthDate().getMonth()).isEqualTo(Month.JUNE);
+        assertThat(person.getBirthDate().getDayOfMonth()).isEqualTo(4);
         final Country citizenship = person.getCitizenship();
         assertThat(citizenship instanceof DynamicBeanProxy).isTrue();
         assertThat(citizenship.getCommonName()).isEqualTo("Cambodia");
-
+        assertThat(person.getSpouse()).containsOnly(1996, 1999, 2000, 2003, 2014);
     }
 
 }

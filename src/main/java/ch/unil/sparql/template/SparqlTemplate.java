@@ -10,17 +10,15 @@ import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.shared.PrefixMapping;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author gushakov
@@ -28,7 +26,7 @@ import java.util.Map;
 public class SparqlTemplate {
 
     private SparqlQueryService queryService;
-    private ConversionService conversionService;
+    private RdfJavaConverter rdfJavaConverter;
     private RdfMappingContext mappingContext;
 
     public SparqlTemplate(String endpoint) {
@@ -45,8 +43,7 @@ public class SparqlTemplate {
 
     public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap) {
         this.queryService = queryService;
-        conversionService = new DefaultConversionService();
-        ((DefaultConversionService) conversionService).addConverter(new RdfJavaConverter());
+        this.rdfJavaConverter = new RdfJavaConverter();
         mappingContext = new RdfMappingContext(Utils.defaultPrefixMap().setNsPrefixes(prefixMap));
     }
 
@@ -66,6 +63,10 @@ public class SparqlTemplate {
         entity.doWithProperties((RdfProperty rdfProperty) -> {
             if (rdfProperty.isSimpleProperty()) {
                 loadSimpleProperty(iri, triples, entity, rdfProperty, propertyAccessor);
+            } else {
+                if (rdfProperty.isCollectionOfSimple()) {
+                    loadCollectionOfSimpleProperties(iri, triples, entity, rdfProperty, propertyAccessor);
+                }
             }
         });
 
@@ -89,7 +90,7 @@ public class SparqlTemplate {
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() != 1) {
             throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
-                    iri + " and property " + rdfProperty.getName() + " with prefix " + rdfProperty.getPrefix() +
+                    iri + " and property " + rdfProperty + " with prefix " + rdfProperty.getPrefix() +
                     ". But found " + matchingTriples.size());
         }
 
@@ -98,12 +99,12 @@ public class SparqlTemplate {
 
         // object must be a literal Node
         if (!objectNode.isLiteral()) {
-            throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to property " + rdfProperty.getName() +
-                    ". But was " + objectNode + (objectNode.isURI()?" (a URI node).":""));
+            throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to property " + rdfProperty +
+                    ". But was " + objectNode + (objectNode.isURI() ? " (a URI node)." : ""));
         }
 
         // convert to Java and assign to the property
-        propertyAccessor.setProperty(rdfProperty, conversionService.convert(objectNode, Object.class));
+        propertyAccessor.setProperty(rdfProperty, rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
     }
 
     private void loadAssociation(String iri, Collection<Triple> triples, RdfEntity<?> entity, Association<RdfProperty> association,
@@ -132,6 +133,41 @@ public class SparqlTemplate {
         propertyAccessor.setProperty(inverseProperty, load(objectNode.getURI(), inverseProperty.getType()));
     }
 
+    private void loadCollectionOfSimpleProperties(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
+                                                  PersistentPropertyAccessor propertyAccessor) {
+
+        final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty, entity.getPrefixMap());
+
+        final Set<Object> valueSet = new HashSet<>();
+
+        for (final Triple triple : matchingTriples) {
+
+            final Node objectNode = triple.getObject();
+
+            // object must be a literal Node
+            if (!objectNode.isLiteral()) {
+                throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to the value set of property " + rdfProperty +
+                        ". But was " + objectNode + (objectNode.isURI() ? " (a URI node)." : ""));
+            }
+
+            // convert to Java and store in the value set
+            valueSet.add(rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
+
+        }
+
+        // cast the collection to the required type
+
+        CollectionUtils.transform(valueSet, new Transformer<Object, Object>() {
+            @Override
+            public Object transform(Object input) {
+                return rdfProperty.getActualType().cast(input);
+            }
+        });
+
+
+        propertyAccessor.setProperty(rdfProperty, valueSet);
+    }
+
     private <T> T createDynamicProxy(String iri, Class<T> beanType, RdfEntity<?> entity) {
         try {
             return new ByteBuddy()
@@ -150,9 +186,30 @@ public class SparqlTemplate {
     }
 
     private Collection<Triple> filterForProperty(Collection<Triple> triples, RdfProperty rdfProperty, final PrefixMapping prefixMap) {
-        final String predicateUri = prefixMap.expandPrefix(rdfProperty.getPrefix() + ":" + rdfProperty.getName());
-        return CollectionUtils.select(triples, triple -> prefixMap.expandPrefix(triple.getPredicate().getURI())
-                .equals(predicateUri));
+        return CollectionUtils.select(triples, triple -> {
+                    final String predicateUri = prefixMap.expandPrefix(triple.getPredicate().getURI());
+
+                    // match qualified name of property to predicate URI
+                    if (predicateUri.equals(rdfProperty.getQName())) {
+
+                        // for relation
+                        if (rdfProperty.isEntity()) {
+                            // check that the object is a URI node
+                            return triple.getObject().isURI();
+                        }
+
+                        // for simple property or collection of simple properties
+                        if (rdfProperty.isSimpleProperty() || rdfProperty.isCollectionOfSimple()) {
+                            // check that object is a literal node and that it can be converted to the value for the property
+                            return triple.getObject().isLiteral()
+                                    && rdfJavaConverter.canConvert((Node_Literal) triple.getObject(), rdfProperty);
+                        }
+
+                    }
+
+                    return false;
+                }
+        );
     }
 
 }

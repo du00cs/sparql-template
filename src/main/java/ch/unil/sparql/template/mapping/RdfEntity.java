@@ -1,8 +1,9 @@
 package ch.unil.sparql.template.mapping;
 
-import ch.unil.sparql.template.annotation.PrefixMap;
+import ch.unil.sparql.template.annotation.Rdf;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimpleAssociationHandler;
@@ -20,24 +21,17 @@ import java.util.Optional;
  * @author gushakov
  */
 public class RdfEntity<T> extends BasicPersistentEntity<T, RdfProperty> {
+    private Rdf annot;
+
     private PrefixMapping prefixMap;
 
-    private PrefixMap prefixMapAnnot;
-
-    public RdfEntity(TypeInformation<T> information, PrefixMapping prefixMap) {
+    public RdfEntity(TypeInformation < T > information, PrefixMapping prefixMap) {
         super(information);
-        this.prefixMapAnnot = findAnnotation(PrefixMap.class);
+        this.annot = findAnnotation(Rdf.class);
+
+        // add any prefix mappings declared with this entity
+        prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(), annot.value()));
         this.prefixMap = prefixMap;
-    }
-
-    @Override
-    public void verify() {
-        super.verify();
-
-        // record prefix map if specified for this entity
-        if (prefixMapAnnot != null) {
-            prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(), prefixMapAnnot.value()));
-        }
     }
 
     public PrefixMapping getPrefixMap() {

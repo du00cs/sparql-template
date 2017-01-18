@@ -2,13 +2,15 @@ package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.Utils;
 import ch.unil.sparql.template.annotation.Predicate;
-import ch.unil.sparql.template.annotation.PrefixMap;
+import ch.unil.sparql.template.annotation.Rdf;
 import ch.unil.sparql.template.annotation.Relation;
-import ch.unil.sparql.template.bean.Country;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.jena.shared.PrefixMapping;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -21,42 +23,47 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
  */
 public class RdfMappingContextTest {
 
+    @Rdf
     public static class Person1 {
     }
 
-    @PrefixMap({"foo", "http://foobar/", "wam"})
+    @Rdf({"foo", "http://foobar/", "wam"})
     public static class Person2 {
     }
 
-    @PrefixMap({"foo"})
+    @Rdf({"foo"})
     public static class Person3 {
     }
 
+    @Rdf
     public static class Person4 {
 
         @Predicate(DBP)
         private String birthName;
     }
 
+    @Rdf
     public static class Person5 {
 
     }
 
+    @Rdf
     public static class Person6 {
 
         @Relation
-        private Country citizenship;
+        private Country1 citizenship;
 
-        public Country getCitizenship() {
+        public Country1 getCitizenship() {
             return citizenship;
         }
     }
 
+    @Rdf
     public static class Country1 {
 
     }
 
-
+    @Rdf
     public static class Person7 {
 
         @Predicate(DBP)
@@ -64,10 +71,25 @@ public class RdfMappingContextTest {
 
     }
 
+    public static class Person8 {
+
+        private LocalDateTime localDateTime;
+    }
+
+    @Rdf
+    public static class Person9 {
+
+        @Predicate
+        private ZonedDateTime zonedDateTime;
+
+        // transient property
+        private DateTimeFormatter formatter;
+    }
+
     @Test
     public void testDefaultPrefixMap() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person1.class);
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person1.class);
         final PrefixMapping prefixMap = entity.getPrefixMap();
         final Map<String, String> defaultPrefixMap = Utils.defaultPrefixMap().getNsPrefixMap();
         assertThat(prefixMap.getNsPrefixMap()).containsKeys(defaultPrefixMap.keySet().toArray(new String[defaultPrefixMap.size()]));
@@ -76,7 +98,7 @@ public class RdfMappingContextTest {
     @Test
     public void testCustomPrefixMap() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person2.class);
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person2.class);
         final PrefixMapping prefixMap = entity.getPrefixMap();
         assertThat(prefixMap.getNsPrefixMap())
                 .containsKeys("foo")
@@ -87,7 +109,7 @@ public class RdfMappingContextTest {
     @Test
     public void testInvalidPrefixMap() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person3.class);
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person3.class);
         final PrefixMapping prefixMap = entity.getPrefixMap();
         assertThat(prefixMap.getNsPrefixMap()).doesNotContainKeys("foo");
     }
@@ -95,8 +117,8 @@ public class RdfMappingContextTest {
     @Test
     public void testPredicatePrefix() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person4.class);
-        final RdfProperty birthNameProperty = entity.getPersistentProperty("birthName");
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person4.class);
+        final RdfProperty birthNameProperty = (RdfProperty) entity.getPersistentProperty("birthName");
         assertThat(birthNameProperty).isNotNull();
         assertThat(birthNameProperty.getPrefix()).isEqualTo(DBP);
     }
@@ -105,15 +127,15 @@ public class RdfMappingContextTest {
     public void testInitializePrefixMap() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext(Utils.defaultPrefixMap()
                 .setNsPrefixes(Collections.singletonMap("foo", "http://foobar")));
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person5.class);
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person5.class);
         assertThat(entity.getPrefixMap().getNsPrefixMap()).contains(new MutablePair<>("foo", "http://foobar"));
     }
 
     @Test
     public void testRelation() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person6.class);
-        final RdfProperty citizenship = entity.getPersistentProperty("citizenship");
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person6.class);
+        final RdfProperty citizenship = (RdfProperty) entity.getPersistentProperty("citizenship");
         assertThat(citizenship.isAssociation()).isTrue();
         assertThat(citizenship.isEntity()).isTrue();
         assertThat(citizenship.isCollectionLike()).isFalse();
@@ -122,12 +144,35 @@ public class RdfMappingContextTest {
     @Test
     public void testCollectionOfSimpleProperties() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity<?> entity = mappingContext.getPersistentEntity(Person7.class);
-        final RdfProperty years = entity.getPersistentProperty("spouse");
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person7.class);
+        final RdfProperty years = (RdfProperty) entity.getPersistentProperty("spouse");
         assertThat(years.isEntity()).isFalse();
         assertThat(years.isAssociation()).isFalse();
         assertThat(years.isCollectionLike()).isTrue();
         assertThat(years.getTypeInformation().getActualType().getType()).isEqualTo(Integer.class);
+    }
+
+    @Test
+    public void testDoNotProcessTransientEntity() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person8.class);
+        assertThat(entity).isNull();
+    }
+
+    @Test
+    public void testDoNotProcessTransientProperties() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person9.class);
+        final RdfProperty formatterProperty = (RdfProperty) entity.getPersistentProperty("formatter");
+        assertThat(formatterProperty).isNull();
+    }
+
+    @Test
+    public void testZoneDateTimeIsASimpleType() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfEntity entity = mappingContext.getPersistentEntity(Person9.class);
+        final RdfProperty zonedDateTimeProperty = (RdfProperty) entity.getPersistentProperty("zonedDateTime");
+        assertThat(zonedDateTimeProperty.isSimpleProperty());
     }
 
 }

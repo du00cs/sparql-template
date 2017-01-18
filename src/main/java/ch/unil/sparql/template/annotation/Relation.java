@@ -1,5 +1,6 @@
 package ch.unil.sparql.template.annotation;
 
+import org.springframework.data.annotation.Persistent;
 import org.springframework.data.annotation.Reference;
 
 import java.lang.annotation.ElementType;
@@ -12,6 +13,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
+@Predicate
 @Reference
 public @interface Relation {
 }

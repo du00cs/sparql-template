@@ -3,9 +3,10 @@ package ch.unil.sparql.template;
 import ch.unil.sparql.template.bean.Person;
 import org.junit.Test;
 
-import java.util.Calendar;
+import java.time.ZonedDateTime;
+import java.util.Collections;
 
-import static ch.unil.sparql.template.Prefixes.*;
+import static ch.unil.sparql.template.Prefixes.DBR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -18,8 +19,9 @@ public class SparqlTemplateTestIT {
         final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql");
         final Person person = sparqlTemplate.load(DBR + ":Angelina_Jolie", Person.class);
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
-        assertThat(person.getBirthDate()).hasYear(1975).hasMonth(Calendar.JUNE + 1).hasDayOfMonth(4);
+        assertThat(person.getBirthDate().getYear()).isEqualTo(1975);
         assertThat(person.getCitizenship().getCommonName()).isEqualTo("Cambodia");
+        assertThat(person.getSpouse()).containsOnly(1996, 1999, 2000, 2003, 2014);
     }
 
 }
