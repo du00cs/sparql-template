@@ -65,6 +65,7 @@ public class SparqlTemplateTest {
         assertThat(citizenship instanceof DynamicBeanProxy).isTrue();
         assertThat(citizenship.getCommonName()).isEqualTo("Cambodia");
         assertThat(person.getYearsMarried()).containsOnly(1996, 1999, 2000, 2003, 2014);
+        assertThat(person.getSpouse().size()).isGreaterThanOrEqualTo(3);
     }
 
 }
