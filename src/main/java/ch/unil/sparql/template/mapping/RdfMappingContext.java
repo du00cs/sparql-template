@@ -1,7 +1,6 @@
 package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.Utils;
-import ch.unil.sparql.template.annotation.Predicate;
 import org.apache.jena.shared.PrefixMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

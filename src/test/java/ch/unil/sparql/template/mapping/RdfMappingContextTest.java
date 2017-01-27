@@ -24,26 +24,26 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 public class RdfMappingContextTest {
 
     @Rdf
-    public static class Person1 {
+    private static class Person1 {
     }
 
     @Rdf({"foo", "http://foobar/", "wam"})
-    public static class Person2 {
+    private static class Person2 {
     }
 
     @Rdf({"foo"})
-    public static class Person3 {
+    private static class Person3 {
     }
 
     @Rdf
-    public static class Person4 {
+    private static class Person4 {
 
         @Predicate(DBP)
         private String birthName;
     }
 
     @Rdf
-    public static class Person5 {
+    private static class Person5 {
 
     }
 
@@ -60,25 +60,25 @@ public class RdfMappingContextTest {
     }
 
     @Rdf
-    public static class Country1 {
+    private static class Country1 {
 
     }
 
     @Rdf
-    public static class Person7 {
+    private static class Person7 {
 
         @Predicate(DBP)
         private Collection<Integer> spouse;
 
     }
 
-    public static class Person8 {
+    private static class Person8 {
 
         private LocalDateTime localDateTime;
     }
 
     @Rdf
-    public static class Person9 {
+    private static class Person9 {
 
         @Predicate
         private ZonedDateTime zonedDateTime;
@@ -86,6 +86,26 @@ public class RdfMappingContextTest {
         // transient property
         private DateTimeFormatter formatter;
     }
+
+    @Rdf
+    private static class Person11 {
+
+        @Predicate
+        @Relation
+        private Country2 nationality;
+
+    }
+
+    @Rdf
+    private static class Country2 {
+
+        @Predicate
+        @Relation(virtual = true)
+        private Person11 citizen;
+
+    }
+
+
 
     @Test
     public void testDefaultPrefixMap() throws Exception {
@@ -176,4 +196,16 @@ public class RdfMappingContextTest {
         assertThat(zonedDateTimeProperty.isSimpleProperty());
     }
 
+    @Test
+    public void testVirtual() throws Exception {
+        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfEntity fromEntity = mappingContext.getPersistentEntity(Person11.class);
+        final RdfProperty fromProp = (RdfProperty) fromEntity.getPersistentProperty("nationality");
+        assertThat(fromProp.isRelation()).isTrue();
+        assertThat(fromProp.isVirtual()).isFalse();
+        final RdfEntity toEntity = mappingContext.getPersistentEntity(Country2.class);
+        final RdfProperty toProp = (RdfProperty) toEntity.getPersistentProperty("citizen");
+        assertThat(toProp.isRelation()).isTrue();
+        assertThat(toProp.isVirtual()).isTrue();
+    }
 }

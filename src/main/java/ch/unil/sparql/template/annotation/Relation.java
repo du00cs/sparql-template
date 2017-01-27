@@ -14,4 +14,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Reference
 public @interface Relation {
+    boolean virtual() default false;
+    String fromProperty() default "";
 }

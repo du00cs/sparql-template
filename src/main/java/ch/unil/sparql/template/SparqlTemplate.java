@@ -48,8 +48,12 @@ public class SparqlTemplate {
     }
 
     public <T> T load(String iri, Class<T> type) {
+       return load(null, null, iri, type);
+    }
+
+    private <S, T> T load(S fromBean, RdfProperty fromProperty, String iri, Class<T> type){
         RdfEntity<?> entity = mappingContext.getPersistentEntity(type);
-        return createDynamicProxy(iri, type, entity);
+        return createDynamicProxy(fromBean, fromProperty, iri, type, entity);
     }
 
     <T> PersistentPropertyAccessor loadProperties(String iri, T bean) {
@@ -95,22 +99,10 @@ public class SparqlTemplate {
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() == 0) {
             return;
-
-/*
-            throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
-                    iri + " and property " + rdfProperty + " with prefix " + rdfProperty.getPrefix() +
-                    ". But found " + matchingTriples.size());
-*/
         }
 
         final Triple triple = matchingTriples.iterator().next();
         final Node objectNode = triple.getObject();
-
-        // object must be a literal Node
-        if (!objectNode.isLiteral()) {
-            throw new UnsupportedOperationException("Expecting a literal RDF node to be assigned to property " + rdfProperty +
-                    ". But was " + objectNode + (objectNode.isURI() ? " (a URI node)." : ""));
-        }
 
         // convert to Java and assign to the property
         propertyAccessor.setProperty(rdfProperty, rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
@@ -127,17 +119,12 @@ public class SparqlTemplate {
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() != 1) {
             return;
-/*
-            throw new IllegalStateException("Expecting exactly one RDF predicate for IRI " +
-                    iri + " and property " + inverseProperty + " with prefix " + inverseProperty.getPrefix() +
-                    ". But found " + matchingTriples.size());
-*/
         }
 
         final Triple triple = matchingTriples.iterator().next();
         final Node objectNode = triple.getObject();
 
-        propertyAccessor.setProperty(inverseProperty, load(objectNode.getURI(), inverseProperty.getType()));
+        propertyAccessor.setProperty(inverseProperty, load(this, inverseProperty, objectNode.getURI(), inverseProperty.getType()));
     }
 
     private void loadCollectionOfSimpleProperties(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
@@ -179,20 +166,20 @@ public class SparqlTemplate {
         final Set<DynamicBeanProxy> proxies = new HashSet<>();
 
         for (final Triple triple : matchingTriples){
-            proxies.add((DynamicBeanProxy)load(triple.getObject().getURI(), inverseProperty.getActualType()));
+            proxies.add((DynamicBeanProxy)load(this, inverseProperty, triple.getObject().getURI(), inverseProperty.getActualType()));
         }
 
         propertyAccessor.setProperty(inverseProperty, proxies);
     }
 
-    private <T> T createDynamicProxy(String iri, Class<T> beanType, RdfEntity<?> entity) {
+    private <S, T> T createDynamicProxy(S fromBean, RdfProperty fromProperty, String iri, Class<T> beanType, RdfEntity<?> entity) {
         try {
             return new ByteBuddy()
                     .subclass(beanType)
                     .implement(DynamicBeanProxy.class)
                     .method(ElementMatchers.isDeclaredBy(DynamicBeanProxy.class)
                             .or(ElementMatchers.isGetter()))
-                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor<>(iri, beanType, entity, this)))
+                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor<>(fromBean, fromProperty , iri, beanType, entity, this)))
                     .make()
                     .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
                     .getLoaded()

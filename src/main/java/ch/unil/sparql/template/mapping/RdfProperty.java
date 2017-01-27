@@ -1,6 +1,7 @@
 package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.annotation.Predicate;
+import ch.unil.sparql.template.annotation.Relation;
 import org.apache.jena.shared.PrefixMapping;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentEntity;
@@ -15,7 +16,9 @@ import java.lang.reflect.Field;
  */
 public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> {
 
-    private Predicate annot;
+    private Predicate predicateAnnot;
+
+    private Relation relationAnnot;
 
     private SimpleTypeHolder simpleTypeHolder;
 
@@ -25,7 +28,8 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     public RdfProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, RdfProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-        this.annot = findAnnotation(Predicate.class);
+            this.predicateAnnot = findAnnotation(Predicate.class);
+            this.relationAnnot = findAnnotation(Relation.class);
         this.simpleTypeHolder = simpleTypeHolder;
         this.prefixMap = ((RdfEntity<?>) owner).getPrefixMap();
         this.isTransient = super.isTransient() || !isAnnotationPresent(Predicate.class);
@@ -36,13 +40,18 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
         return new Association<>(this, null);
     }
 
+    @Override
+    public Association<RdfProperty> getAssociation() {
+        return super.getAssociation();
+    }
+
     public String getPrefix() {
-        return annot.value();
+        return predicateAnnot.value();
     }
 
     public String getQName() {
         return prefixMap.expandPrefix(getPrefix() + ":" +
-                (annot.localName().equals(Predicate.DEFAULT_LOCAL_NAME) ? getName() : annot.localName()));
+                (predicateAnnot.localName().equals(Predicate.DEFAULT_LOCAL_NAME) ? getName() : predicateAnnot.localName()));
     }
 
     public boolean isSimpleProperty() {
@@ -60,6 +69,14 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
     @Override
     public boolean isTransient() {
         return isTransient;
+    }
+
+    public boolean isRelation() {
+        return relationAnnot != null;
+    }
+
+    public boolean isVirtual() {
+        return isRelation() && relationAnnot.virtual();
     }
 
     @Override

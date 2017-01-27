@@ -3,8 +3,8 @@ package ch.unil.sparql.template;
 /**
  * @author gushakov
  */
-public interface DynamicBeanProxy {
+public interface DynamicBeanProxy<T> {
 
-    Object __getBean();
+    T __getBean();
 
 }

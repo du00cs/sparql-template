@@ -44,4 +44,6 @@ public class SparqlTemplateTestIT {
         film.getStarring().forEach(a -> System.out.println(a.getBirthName()));
 
     }
+
+
 }
