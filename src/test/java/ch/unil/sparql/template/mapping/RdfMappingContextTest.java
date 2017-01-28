@@ -87,26 +87,6 @@ public class RdfMappingContextTest {
         private DateTimeFormatter formatter;
     }
 
-    @Rdf
-    private static class Person11 {
-
-        @Predicate
-        @Relation
-        private Country2 nationality;
-
-    }
-
-    @Rdf
-    private static class Country2 {
-
-        @Predicate
-        @Relation(virtual = true)
-        private Person11 citizen;
-
-    }
-
-
-
     @Test
     public void testDefaultPrefixMap() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
@@ -196,16 +176,4 @@ public class RdfMappingContextTest {
         assertThat(zonedDateTimeProperty.isSimpleProperty());
     }
 
-    @Test
-    public void testVirtual() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity fromEntity = mappingContext.getPersistentEntity(Person11.class);
-        final RdfProperty fromProp = (RdfProperty) fromEntity.getPersistentProperty("nationality");
-        assertThat(fromProp.isRelation()).isTrue();
-        assertThat(fromProp.isVirtual()).isFalse();
-        final RdfEntity toEntity = mappingContext.getPersistentEntity(Country2.class);
-        final RdfProperty toProp = (RdfProperty) toEntity.getPersistentProperty("citizen");
-        assertThat(toProp.isRelation()).isTrue();
-        assertThat(toProp.isVirtual()).isTrue();
-    }
 }

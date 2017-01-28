@@ -75,10 +75,6 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
         return relationAnnot != null;
     }
 
-    public boolean isVirtual() {
-        return isRelation() && relationAnnot.virtual();
-    }
-
     @Override
     public String toString() {
         return getOwner().getType().getSimpleName() + "." + getName();

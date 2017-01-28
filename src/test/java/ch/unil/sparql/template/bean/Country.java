@@ -15,15 +15,8 @@ public class Country {
     @Predicate(DBP)
     private String commonName;
 
-    @Predicate
-    @Relation(virtual = true)
-    private Person distinguishedCitizen;
-
     public String getCommonName() {
         return commonName;
     }
 
-    public Person getDistinguishedCitizen() {
-        return distinguishedCitizen;
-    }
 }

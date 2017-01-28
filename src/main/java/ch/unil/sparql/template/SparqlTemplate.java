@@ -179,7 +179,7 @@ public class SparqlTemplate {
                     .implement(DynamicBeanProxy.class)
                     .method(ElementMatchers.isDeclaredBy(DynamicBeanProxy.class)
                             .or(ElementMatchers.isGetter()))
-                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor<>(fromBean, fromProperty , iri, beanType, entity, this)))
+                    .intercept(MethodDelegation.to(new DynamicBeanProxyInterceptor<>(iri, beanType, entity, this)))
                     .make()
                     .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
                     .getLoaded()

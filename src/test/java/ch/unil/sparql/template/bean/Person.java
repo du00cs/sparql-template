@@ -6,6 +6,7 @@ import ch.unil.sparql.template.annotation.Relation;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.UUID;
 
 import static ch.unil.sparql.template.Prefixes.DBO;
 import static ch.unil.sparql.template.Prefixes.DBP;
@@ -31,6 +32,8 @@ public class Person {
     @Relation
     private Collection<Person> spouse;
 
+    private UUID uuid;
+
     public String getBirthName() {
         return birthName;
     }
@@ -49,5 +52,9 @@ public class Person {
 
     public Collection<Person> getSpouse() {
         return spouse;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 }

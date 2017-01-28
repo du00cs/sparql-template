@@ -19,10 +19,6 @@ import java.util.Optional;
 public class DynamicBeanProxyInterceptor<S, T> {
     private static final Logger logger = LoggerFactory.getLogger(DynamicBeanProxyInterceptor.class);
 
-    private S fromBean;
-
-    private RdfProperty fromProperty;
-
     private String iri;
 
     private T bean;
@@ -35,9 +31,7 @@ public class DynamicBeanProxyInterceptor<S, T> {
 
     private PersistentPropertyAccessor propertyAccessor;
 
-    public DynamicBeanProxyInterceptor(S fromBean, RdfProperty fromProperty, String iri, Class<T> beanType, RdfEntity<?> entity, SparqlTemplate sparqlTemplate) {
-        this.fromBean = fromBean;
-        this.fromProperty = fromProperty;
+    public DynamicBeanProxyInterceptor(String iri, Class<T> beanType, RdfEntity<?> entity, SparqlTemplate sparqlTemplate) {
         this.iri = iri;
         this.beanType = beanType;
         this.entity = entity;
@@ -53,11 +47,13 @@ public class DynamicBeanProxyInterceptor<S, T> {
 
         logger.debug("Intercepting getter {} for bean of type {}", getter.getName(), beanType.getSimpleName());
 
+        // initialize the bean and load the properties if needed
+        initializeBean();
+
         // find a property corresponding to the getter
         final Optional<PersistentProperty<?>> getterPropertyOptional = entity.findPropertyForGetter(getter);
 
-
-    // if there is no matching property, try to find an association corresponding to the getter
+        // if there is no matching property, try to find an association corresponding to the getter
         if (!getterPropertyOptional.isPresent()) {
             final Optional<Association<?>> getterAssociationOptional = entity.findAssociationForGetter(getter);
             if (!getterAssociationOptional.isPresent()) {
@@ -65,25 +61,12 @@ public class DynamicBeanProxyInterceptor<S, T> {
                         getter.getName() + " for bean of type " + beanType.getSimpleName());
             } else {
 
-                // check if this is virtual relation matching fromProperty, if it is just return the fromBean
                 final Association<?> association = getterAssociationOptional.get();
-
-                final RdfProperty inverseProperty = ((RdfProperty)association.getInverse());
-
-                if (inverseProperty.isVirtual() && inverseProperty.equals(fromProperty)){
-                    return fromBean;
-                }
-
-                // initialize the bean and load the properties if needed
-                initializeBean();
-
+                final RdfProperty inverseProperty = ((RdfProperty) association.getInverse());
                 // access the value of the inverse property of matching association
                 return propertyAccessor.getProperty(inverseProperty);
             }
         } else {
-            // initialize the bean and load the properties if needed
-            initializeBean();
-
             // access the value of the matching property
             return propertyAccessor.getProperty(getterPropertyOptional.get());
         }
