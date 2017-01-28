@@ -48,10 +48,10 @@ public class SparqlTemplate {
     }
 
     public <T> T load(String iri, Class<T> type) {
-       return load(null, null, iri, type);
+        return load(null, null, iri, type);
     }
 
-    private <S, T> T load(S fromBean, RdfProperty fromProperty, String iri, Class<T> type){
+    private <S, T> T load(S fromBean, RdfProperty fromProperty, String iri, Class<T> type) {
         RdfEntity<?> entity = mappingContext.getPersistentEntity(type);
         return createDynamicProxy(fromBean, fromProperty, iri, type, entity);
     }
@@ -80,8 +80,7 @@ public class SparqlTemplate {
             if (association.getInverse().isCollectionOfEntities()) {
                 // multiple entities relation
                 loadCollectionOfEntities(iri, triples, entity, association, propertyAccessor);
-            }
-            else {
+            } else {
                 // single entity relation
                 loadAssociation(iri, triples, entity, association, propertyAccessor);
             }
@@ -132,19 +131,19 @@ public class SparqlTemplate {
 
         final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty, entity.getPrefixMap());
 
-        final Set<Object> valueSet = new HashSet<>();
+        final List<Object> listOfValues = new ArrayList<>();
 
         for (final Triple triple : matchingTriples) {
 
             final Node objectNode = triple.getObject();
 
-            // convert to Java and store in the value set
-            valueSet.add(rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
+            // convert to Java and store in the value list
+            listOfValues.add(rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
 
         }
 
         // cast the collection to the required type
-        CollectionUtils.transform(valueSet, new Transformer<Object, Object>() {
+        CollectionUtils.transform(listOfValues, new Transformer<Object, Object>() {
             @Override
             public Object transform(Object input) {
                 return rdfProperty.getActualType().cast(input);
@@ -152,11 +151,11 @@ public class SparqlTemplate {
         });
 
 
-        propertyAccessor.setProperty(rdfProperty, valueSet);
+        propertyAccessor.setProperty(rdfProperty, listOfValues);
     }
 
     private void loadCollectionOfEntities(String iri, Collection<Triple> triples, RdfEntity<?> entity, Association<RdfProperty> association,
-                                          PersistentPropertyAccessor propertyAccessor){
+                                          PersistentPropertyAccessor propertyAccessor) {
 
         final RdfProperty inverseProperty = association.getInverse();
 
@@ -165,8 +164,8 @@ public class SparqlTemplate {
 
         final Set<DynamicBeanProxy> proxies = new HashSet<>();
 
-        for (final Triple triple : matchingTriples){
-            proxies.add((DynamicBeanProxy)load(this, inverseProperty, triple.getObject().getURI(), inverseProperty.getActualType()));
+        for (final Triple triple : matchingTriples) {
+            proxies.add((DynamicBeanProxy) load(this, inverseProperty, triple.getObject().getURI(), inverseProperty.getActualType()));
         }
 
         propertyAccessor.setProperty(inverseProperty, proxies);
@@ -204,9 +203,21 @@ public class SparqlTemplate {
 
                         // for simple property or collection of simple properties
                         if (rdfProperty.isSimpleProperty() || rdfProperty.isCollectionOfSimple()) {
-                            // check that object is a literal node and that it can be converted to the value for the property
-                            return triple.getObject().isLiteral()
-                                    && rdfJavaConverter.canConvert((Node_Literal) triple.getObject(), rdfProperty);
+
+                            // check that object is literal
+                            if (triple.getObject().isLiteral()) {
+                                final Node_Literal literal = (Node_Literal) triple.getObject();
+                                // match the language, if specified
+                                if (literal.getLiteralLanguage() != null
+                                        && rdfProperty.getLanguage() != null
+                                        && !literal.getLiteralLanguage().equals(rdfProperty.getLanguage())) {
+                                    return false;
+                                }
+
+                                // check that the object value can be converted to the type of the property
+                                return rdfJavaConverter.canConvert((Node_Literal) triple.getObject(), rdfProperty);
+                            }
+
                         }
 
                     }

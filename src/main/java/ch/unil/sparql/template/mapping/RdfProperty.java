@@ -28,8 +28,8 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     public RdfProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, RdfProperty> owner, SimpleTypeHolder simpleTypeHolder) {
         super(field, propertyDescriptor, owner, simpleTypeHolder);
-            this.predicateAnnot = findAnnotation(Predicate.class);
-            this.relationAnnot = findAnnotation(Relation.class);
+        this.predicateAnnot = findAnnotation(Predicate.class);
+        this.relationAnnot = findAnnotation(Relation.class);
         this.simpleTypeHolder = simpleTypeHolder;
         this.prefixMap = ((RdfEntity<?>) owner).getPrefixMap();
         this.isTransient = super.isTransient() || !isAnnotationPresent(Predicate.class);
@@ -73,6 +73,14 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     public boolean isRelation() {
         return relationAnnot != null;
+    }
+
+    public String getLanguage() {
+        if (!predicateAnnot.language().equals(Predicate.DEFAULT_LANGUAGE)) {
+            return predicateAnnot.language();
+        } else {
+            return null;
+        }
     }
 
     @Override

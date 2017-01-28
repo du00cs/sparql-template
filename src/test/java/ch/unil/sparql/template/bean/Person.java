@@ -6,14 +6,18 @@ import ch.unil.sparql.template.annotation.Relation;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.UUID;
 
-import static ch.unil.sparql.template.Prefixes.DBO;
-import static ch.unil.sparql.template.Prefixes.DBP;
+import static ch.unil.sparql.template.Prefixes.*;
 
 
 @Rdf
 public class Person {
+
+    @Predicate(value = RDFS, language = "ru")
+    private String label;
+
+    @Predicate(value = RDFS, localName = "label")
+    private Collection<String> allLabels;
 
     @Predicate(DBP)
     private String birthName;
@@ -32,7 +36,9 @@ public class Person {
     @Relation
     private Collection<Person> spouse;
 
-    private UUID uuid;
+    public String getLabel() {
+        return label;
+    }
 
     public String getBirthName() {
         return birthName;
@@ -54,7 +60,7 @@ public class Person {
         return spouse;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public Collection<String> getAllLabels() {
+        return allLabels;
     }
 }

@@ -26,6 +26,8 @@ public class SparqlTemplateTestIT {
         assertThat(person.getBirthDate().getYear()).isEqualTo(1975);
         assertThat(person.getCitizenship().getCommonName()).isEqualTo("Cambodia");
         assertThat(person.getYearsMarried()).contains(1996, 1999, 2000, 2003, 2014);
+
+        System.out.println(person.getLabel());
     }
 
     @Test

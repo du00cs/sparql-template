@@ -16,6 +16,8 @@ import java.lang.annotation.Target;
 public @interface Predicate {
     String DEFAULT_PREFIX = "";
     String DEFAULT_LOCAL_NAME = "";
+    String DEFAULT_LANGUAGE = "";
     String value() default DEFAULT_PREFIX;
     String localName() default DEFAULT_LOCAL_NAME;
+    String language() default DEFAULT_LANGUAGE;
 }

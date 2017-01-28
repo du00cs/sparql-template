@@ -3,7 +3,7 @@ package ch.unil.sparql.template;
 /**
  * Well-known prefixes and their namespaces. Will be automatically registered with the default prefix map.
  * @author gushakov
- * @see Utils#dbpediaPrefixMap()
+ * @see Utils#defaultPrefixMap()
  */
 public final class Prefixes {
 

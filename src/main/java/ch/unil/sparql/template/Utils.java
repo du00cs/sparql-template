@@ -23,7 +23,7 @@ public class Utils {
                 new String[]{
                         XSD, XSD_NS,
                         RDF, RDF_NS,
-                        RDFS, RDF_NS,
+                        RDFS, RDFS_NS,
                         FOAF, FOAF_NS,
                         DC, DC_NS,
                         OWL, OWL_NS,

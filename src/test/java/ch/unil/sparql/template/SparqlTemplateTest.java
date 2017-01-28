@@ -12,10 +12,7 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import static ch.unil.sparql.template.Prefixes.DBO_NS;
-import static ch.unil.sparql.template.Prefixes.DBP_NS;
-import static ch.unil.sparql.template.Prefixes.DBR;
-import static ch.unil.sparql.template.Prefixes.DBR_NS;
+import static ch.unil.sparql.template.Prefixes.*;
 import static ch.unil.sparql.template.Utils.triple;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -36,6 +33,9 @@ public class SparqlTemplateTest {
         final String countryIri = DBR_NS + "Cambodia";
         when(mockQueryService.query(endsWith("Angelina_Jolie"), any()))
                 .thenReturn(Arrays.asList(
+                        triple(personIri, RDFS_NS +"label", "Angelina Jolie", "en"),
+                        triple(personIri, RDFS_NS +"label", "Angelina Jolie", "fr"),
+                        triple(personIri, RDFS_NS +"label", "Джоли, Анджелина", "ru"),
                         triple(personIri, DBP_NS + "birthDate", "1975-06-04", XSDDatatype.XSDdate),
                         triple(personIri, DBP_NS + "birthName", "Angelina Jolie Voight", "en"),
                         triple(personIri, DBO_NS + "citizenship", countryIri),
@@ -68,6 +68,8 @@ public class SparqlTemplateTest {
         assertThat(citizenship.getCommonName()).isEqualTo("Cambodia");
         assertThat(person.getYearsMarried()).containsOnly(1996, 1999, 2000, 2003, 2014);
         assertThat(person.getSpouse().size()).isGreaterThanOrEqualTo(3);
+        assertThat(person.getLabel()).isEqualTo("Джоли, Анджелина");
+        assertThat(person.getAllLabels()).hasSize(3).containsOnly("Angelina Jolie", "Джоли, Анджелина");
     }
 
 }
