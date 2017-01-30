@@ -1,7 +1,12 @@
 package ch.unil.sparql.template.convert;
 
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.XSDDuration;
+import org.apache.jena.graph.Node_URI;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -13,11 +18,12 @@ import java.util.Date;
 public class ExtendedRdfJavaConverter extends DefaultRdfJavaConverter {
 
     public ExtendedRdfJavaConverter() {
-        super(Date.class, ZonedDateTime.class);
+        super(Date.class, ZonedDateTime.class, Duration.class, URL.class);
     }
 
     @Override
-    protected <T> Object convertLiteralValueToJava(Object literalValue, Class<T> propertyType) {
+    protected Object convertLiteralValueToJava(Object literalValue, Class<?> propertyType) {
+
         // convert dates
         if (literalValue instanceof XSDDateTime) {
 
@@ -31,7 +37,33 @@ public class ExtendedRdfJavaConverter extends DefaultRdfJavaConverter {
             }
         }
 
+        // convert duration
+        if (literalValue instanceof XSDDuration) {
+            XSDDuration duration = (XSDDuration) literalValue;
+
+            if (duration.getYears() != 0 || duration.getMonths() != 0 || duration.getDays() != 0) {
+                throw new IllegalStateException("Only time based duration (hours, minutes, seconds, etc.) can be converted. But was " + duration);
+            }
+
+            return Duration.parse(literalValue.toString());
+        }
+
         // convert by default
         return super.convertLiteralValueToJava(literalValue, propertyType);
+    }
+
+    @Override
+    protected Object convertNodeUriToJava(Node_URI uriNode, Class<?> propertyType) {
+
+        // convert String to URL
+        if (propertyType.equals(URL.class)){
+            try {
+                return new URL(uriNode.toString());
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException("Cannot convert URI node " + uriNode + " to an URL. " + e.getMessage());
+            }
+        }
+
+        return super.convertNodeUriToJava(uriNode, propertyType);
     }
 }

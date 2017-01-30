@@ -1,7 +1,7 @@
 package ch.unil.sparql.template.convert;
 
 import ch.unil.sparql.template.mapping.RdfProperty;
-import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node;
 
 import java.util.Set;
 
@@ -12,7 +12,7 @@ public interface RdfJavaConverter {
 
     Set<Class<?>> getCustomTypes();
 
-    boolean canConvert(Node_Literal node, RdfProperty property);
+    boolean canConvert(Node node, RdfProperty property);
 
-    Object convert(Node_Literal node, RdfProperty property);
+    Object convert(Node node, RdfProperty property);
 }

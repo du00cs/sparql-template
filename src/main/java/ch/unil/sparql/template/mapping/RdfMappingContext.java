@@ -53,7 +53,7 @@ public class RdfMappingContext extends AbstractMappingContext<RdfEntity<?>, RdfP
     @Override
     protected RdfProperty createPersistentProperty(Field field, PropertyDescriptor descriptor, RdfEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
         final RdfProperty property = new RdfProperty(field, descriptor, owner, simpleTypeHolder);
-        logger.debug("Created RDF {} property for field {} of type {}", property.isTransient() ? "(transient)" : "", field.getName(), owner.getType().getSimpleName());
+        logger.debug("Created RDF {} property for field {} of type {}", property.isTransient() ? "transient" : "persistent", field.getName(), owner.getType().getSimpleName());
         return property;
     }
 

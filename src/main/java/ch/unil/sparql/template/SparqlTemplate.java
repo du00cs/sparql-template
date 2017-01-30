@@ -11,9 +11,7 @@ import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Transformer;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.shared.PrefixMapping;
 import org.springframework.data.mapping.Association;
@@ -110,7 +108,7 @@ public class SparqlTemplate {
         final Node objectNode = triple.getObject();
 
         // convert to Java and assign to the property
-        propertyAccessor.setProperty(rdfProperty, rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
+        propertyAccessor.setProperty(rdfProperty, rdfJavaConverter.convert(objectNode, rdfProperty));
     }
 
     private void loadAssociation(String iri, Collection<Triple> triples, RdfEntity<?> entity, Association<RdfProperty> association,
@@ -144,18 +142,12 @@ public class SparqlTemplate {
             final Node objectNode = triple.getObject();
 
             // convert to Java and store in the value list
-            listOfValues.add(rdfJavaConverter.convert((Node_Literal) objectNode, rdfProperty));
+            listOfValues.add(rdfJavaConverter.convert(objectNode, rdfProperty));
 
         }
 
         // cast the collection to the required type
-        CollectionUtils.transform(listOfValues, new Transformer<Object, Object>() {
-            @Override
-            public Object transform(Object input) {
-                return rdfProperty.getActualType().cast(input);
-            }
-        });
-
+        CollectionUtils.transform(listOfValues, input -> rdfProperty.getActualType().cast(input));
 
         propertyAccessor.setProperty(rdfProperty, listOfValues);
     }
@@ -209,21 +201,8 @@ public class SparqlTemplate {
 
                         // for simple property or collection of simple properties
                         if (rdfProperty.isSimpleProperty() || rdfProperty.isCollectionOfSimple()) {
-
-                            // check that object is literal
-                            if (triple.getObject().isLiteral()) {
-                                final Node_Literal literal = (Node_Literal) triple.getObject();
-                                // match the language, if specified
-                                if (literal.getLiteralLanguage() != null
-                                        && rdfProperty.getLanguage() != null
-                                        && !literal.getLiteralLanguage().equals(rdfProperty.getLanguage())) {
-                                    return false;
-                                }
-
-                                // check that the object value can be converted to the type of the property
-                                return rdfJavaConverter.canConvert((Node_Literal) triple.getObject(), rdfProperty);
-                            }
-
+                            // check that the object value can be converted to the type of the property
+                            return rdfJavaConverter.canConvert(triple.getObject(), rdfProperty);
                         }
 
                     }

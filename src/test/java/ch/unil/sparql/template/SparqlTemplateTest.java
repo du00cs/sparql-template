@@ -7,13 +7,17 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.net.URL;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static ch.unil.sparql.template.Prefixes.DBO_NS;
 import static ch.unil.sparql.template.Prefixes.DBP_NS;
 import static ch.unil.sparql.template.Prefixes.DBR;
 import static ch.unil.sparql.template.Prefixes.DBR_NS;
+import static ch.unil.sparql.template.Prefixes.FOAF_NS;
+import static ch.unil.sparql.template.Prefixes.OWL_NS;
 import static ch.unil.sparql.template.Prefixes.RDFS_NS;
 import static ch.unil.sparql.template.Utils.triple;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,12 +53,15 @@ public class SparqlTemplateTest {
                         triple(personIri, DBP_NS + "spouse", "div.", "en"),
                         triple(personIri, DBP_NS + "spouse", DBR_NS + "Billy_Bob_Thornton"),
                         triple(personIri, DBP_NS + "spouse", DBR_NS + "Jonny_Lee_Miller"),
-                        triple(personIri, DBP_NS + "spouse", DBR_NS + "Brad_Pitt")
+                        triple(personIri, DBP_NS + "spouse", DBR_NS + "Brad_Pitt"),
+                        triple(personIri, FOAF_NS + "homepage", "http://www.unhcr.org/pages/49c3646c56.html"),
+                        triple(personIri, OWL_NS + "sameAs", "http://www.wikidata.org/entity/Q13909"),
+                        triple(personIri, OWL_NS + "sameAs", "http://yago-knowledge.org/resource/Angelina_Jolie")
                 ));
 
         // :Cambodia
         when(mockQueryService.query(endsWith("Cambodia"), any()))
-                .thenReturn(Arrays.asList(
+                .thenReturn(Collections.singletonList(
                         triple(countryIri, DBP_NS + "commonName", "Cambodia", "en")
                 ));
 
@@ -72,6 +79,11 @@ public class SparqlTemplateTest {
         assertThat(person.getSpouse().size()).isGreaterThanOrEqualTo(3);
         assertThat(person.getLabel()).isEqualTo("Джоли, Анджелина");
         assertThat(person.getAllLabels()).hasSize(3).containsOnly("Angelina Jolie", "Джоли, Анджелина");
+        assertThat(person.getHomepage()).isEqualTo("http://www.unhcr.org/pages/49c3646c56.html");
+        assertThat(person.getSameAs()).containsOnly("http://www.wikidata.org/entity/Q13909",
+                "http://yago-knowledge.org/resource/Angelina_Jolie");
+        assertThat(person.getSameAsUrl()).containsOnly(new URL("http://www.wikidata.org/entity/Q13909"),
+                new URL("http://yago-knowledge.org/resource/Angelina_Jolie"));
     }
 
 }

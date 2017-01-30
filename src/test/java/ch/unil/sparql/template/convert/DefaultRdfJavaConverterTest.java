@@ -7,8 +7,10 @@ import ch.unil.sparql.template.mapping.RdfProperty;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node_URI;
 import org.junit.Test;
 
+import java.net.URL;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +27,9 @@ public class DefaultRdfJavaConverterTest {
 
         @Predicate
         private Collection<Integer> collectionOfIntegers;
+
+        @Predicate
+        private String href;
 
     }
 
@@ -48,5 +53,14 @@ public class DefaultRdfJavaConverterTest {
         assertThat(number).isEqualTo(123);
     }
 
+    @Test
+    public void testConvertNodeUriToString() throws Exception {
+        final RdfProperty rdfProperty = new RdfMappingContext().getPersistentEntity(Person.class).getPersistentProperty("href");
+        final Node_URI node = (Node_URI) NodeFactory.createURI("http://example.org");
+        final DefaultRdfJavaConverter converter = new DefaultRdfJavaConverter();
+        assertThat(converter.canConvert(node, rdfProperty)).isTrue();
+        final String uri = (String) converter.convert(node, rdfProperty);
+        assertThat(uri).isEqualTo("http://example.org");
+    }
 
 }
