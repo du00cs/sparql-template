@@ -65,6 +65,9 @@ them automatically to the required Java instance.
     System.out.println(person.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy (EEE)", Locale.ENGLISH)));
     // 04/06/1975 (Wed)
 
-    System.out.println(person.getSpouse().stream().filter(p -> p.getBirthName().contains("Pitt")).findAny().get().getBirthName());
+    System.out.println(person.getSpouse().stream()
+            .filter(p -> p.getBirthName() != null && p.getBirthName().contains("Pitt"))
+            .findAny().get().getBirthName());
     // William Bradley Pitt
+
 ```
