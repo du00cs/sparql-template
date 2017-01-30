@@ -1,9 +1,9 @@
 package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.annotation.Rdf;
+import ch.unil.sparql.template.convert.RdfJavaConverter;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimpleAssociationHandler;
@@ -25,9 +25,15 @@ public class RdfEntity<T> extends BasicPersistentEntity<T, RdfProperty> {
 
     private PrefixMapping prefixMap;
 
-    public RdfEntity(TypeInformation < T > information, PrefixMapping prefixMap) {
+    public RdfEntity(TypeInformation<T> information, PrefixMapping prefixMap) {
         super(information);
         this.annot = findAnnotation(Rdf.class);
+
+        if (annot == null) {
+            throw new IllegalStateException("No " + Rdf.class.getSimpleName() + " annotation for entity " +
+                    this.getType().getSimpleName() + ". If this is a custom (simple) type of a property to be assigned a literal value, then register it with a custom " +
+                    RdfJavaConverter.class.getSimpleName() + ".");
+        }
 
         // add any prefix mappings declared with this entity
         prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(), annot.value()));

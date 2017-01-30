@@ -1,6 +1,5 @@
 package ch.unil.sparql.template;
 
-import ch.unil.sparql.template.bean.Actor;
 import ch.unil.sparql.template.bean.Country;
 import ch.unil.sparql.template.bean.Person;
 import ch.unil.sparql.template.query.SparqlQueryService;
@@ -10,9 +9,12 @@ import org.mockito.Mockito;
 
 import java.time.Month;
 import java.util.Arrays;
-import java.util.function.Consumer;
 
-import static ch.unil.sparql.template.Prefixes.*;
+import static ch.unil.sparql.template.Prefixes.DBO_NS;
+import static ch.unil.sparql.template.Prefixes.DBP_NS;
+import static ch.unil.sparql.template.Prefixes.DBR;
+import static ch.unil.sparql.template.Prefixes.DBR_NS;
+import static ch.unil.sparql.template.Prefixes.RDFS_NS;
 import static ch.unil.sparql.template.Utils.triple;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;

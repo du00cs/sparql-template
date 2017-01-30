@@ -1,5 +1,6 @@
 package ch.unil.sparql.template;
 
+import ch.unil.sparql.template.convert.ExtendedRdfJavaConverter;
 import ch.unil.sparql.template.convert.RdfJavaConverter;
 import ch.unil.sparql.template.mapping.RdfEntity;
 import ch.unil.sparql.template.mapping.RdfMappingContext;
@@ -30,21 +31,26 @@ public class SparqlTemplate {
     private RdfMappingContext mappingContext;
 
     public SparqlTemplate(String endpoint) {
-        this(new SparqlQueryService(endpoint, true));
+        this(new SparqlQueryService(endpoint, true), Collections.emptyMap(), new ExtendedRdfJavaConverter());
     }
 
     public SparqlTemplate(String endpoint, Map<String, String> prefixMap) {
-        this(new SparqlQueryService(endpoint, true), prefixMap);
+        this(new SparqlQueryService(endpoint, true), prefixMap, new ExtendedRdfJavaConverter());
     }
 
     public SparqlTemplate(SparqlQueryService queryService) {
-        this(queryService, Collections.emptyMap());
+        this(queryService, Collections.emptyMap(), new ExtendedRdfJavaConverter());
     }
 
     public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap) {
+        this(queryService, prefixMap, new ExtendedRdfJavaConverter());
+    }
+
+    public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap, RdfJavaConverter rdfJavaConverter) {
         this.queryService = queryService;
-        this.rdfJavaConverter = new RdfJavaConverter();
-        mappingContext = new RdfMappingContext(Utils.defaultPrefixMap().setNsPrefixes(prefixMap));
+        this.rdfJavaConverter = rdfJavaConverter;
+        mappingContext = new RdfMappingContext(Utils.defaultPrefixMap().setNsPrefixes(prefixMap),
+                rdfJavaConverter.getCustomTypes());
     }
 
     public <T> T load(String iri, Class<T> type) {

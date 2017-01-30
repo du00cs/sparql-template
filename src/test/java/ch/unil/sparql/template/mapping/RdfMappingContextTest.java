@@ -162,7 +162,7 @@ public class RdfMappingContextTest {
 
     @Test
     public void testDoNotProcessTransientProperties() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfMappingContext mappingContext = new RdfMappingContext(ZonedDateTime.class);
         final RdfEntity entity = mappingContext.getPersistentEntity(Person9.class);
         final RdfProperty formatterProperty = (RdfProperty) entity.getPersistentProperty("formatter");
         assertThat(formatterProperty).isNull();
@@ -170,7 +170,7 @@ public class RdfMappingContextTest {
 
     @Test
     public void testZoneDateTimeIsASimpleType() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
+        final RdfMappingContext mappingContext = new RdfMappingContext(ZonedDateTime.class);
         final RdfEntity entity = mappingContext.getPersistentEntity(Person9.class);
         final RdfProperty zonedDateTimeProperty = (RdfProperty) entity.getPersistentProperty("zonedDateTime");
         assertThat(zonedDateTimeProperty.isSimpleProperty());

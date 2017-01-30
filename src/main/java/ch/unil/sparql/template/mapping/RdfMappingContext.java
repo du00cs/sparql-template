@@ -12,8 +12,9 @@ import org.springframework.data.util.TypeInformation;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author gushakov
@@ -25,21 +26,20 @@ public class RdfMappingContext extends AbstractMappingContext<RdfEntity<?>, RdfP
 
     public RdfMappingContext() {
         this(Utils.defaultPrefixMap(), null);
-        this.prefixMap = Utils.defaultPrefixMap();
-        setSimpleTypeHolder(new SimpleTypeHolder(Collections.singleton(ZonedDateTime.class), true));
     }
 
     public RdfMappingContext(PrefixMapping prefixMap) {
-        this.prefixMap = prefixMap;
-        setSimpleTypeHolder(new SimpleTypeHolder(Collections.singleton(ZonedDateTime.class), true));
+        this(prefixMap, null);
     }
 
-    public RdfMappingContext(PrefixMapping prefixMap, SimpleTypeHolder simpleTypeHolder) {
+    public RdfMappingContext(Class<?>... customTypes){
+        this(Utils.defaultPrefixMap(), new HashSet<>(Arrays.asList(customTypes)));
+    }
+
+    public RdfMappingContext(PrefixMapping prefixMap, Set<Class<?>> customTypes) {
         this.prefixMap = prefixMap;
-        if (simpleTypeHolder != null) {
-            setSimpleTypeHolder(simpleTypeHolder);
-        } else {
-            setSimpleTypeHolder(new SimpleTypeHolder(Collections.singleton(ZonedDateTime.class), true));
+        if (customTypes != null) {
+            setSimpleTypeHolder(new SimpleTypeHolder(customTypes, true));
         }
     }
 
