@@ -38,8 +38,8 @@ public class DynamicBeanProxyInterceptor<S, T> {
         this.sparqlTemplate = sparqlTemplate;
     }
 
-    public T __getBean() {
-        return bean;
+    public String __getIri() {
+        return iri;
     }
 
     @RuntimeType

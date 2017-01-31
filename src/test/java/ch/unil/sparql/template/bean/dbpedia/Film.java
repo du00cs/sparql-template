@@ -1,4 +1,4 @@
-package ch.unil.sparql.template.bean;
+package ch.unil.sparql.template.bean.dbpedia;
 
 import ch.unil.sparql.template.Prefixes;
 import ch.unil.sparql.template.annotation.Predicate;

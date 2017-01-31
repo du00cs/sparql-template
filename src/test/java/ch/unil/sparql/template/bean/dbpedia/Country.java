@@ -1,4 +1,4 @@
-package ch.unil.sparql.template.bean;
+package ch.unil.sparql.template.bean.dbpedia;
 
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Rdf;

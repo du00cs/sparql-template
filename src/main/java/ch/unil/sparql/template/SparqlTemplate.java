@@ -14,6 +14,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.shared.PrefixMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 
@@ -23,6 +25,8 @@ import java.util.*;
  * @author gushakov
  */
 public class SparqlTemplate {
+
+    private static final Logger logger = LoggerFactory.getLogger(SparqlTemplate.class);
 
     private SparqlQueryService queryService;
     private RdfJavaConverter rdfJavaConverter;
@@ -66,6 +70,8 @@ public class SparqlTemplate {
 
         // query SPARQL endpoint for the set of all triples matching the subject IRI
         final Collection<Triple> triples = queryService.query(iri, entity.getPrefixMap());
+
+        logger.debug("SPARQL query returned " + triples.size() + " triples");
 
         // load all simple properties
         entity.doWithProperties((RdfProperty rdfProperty) -> {

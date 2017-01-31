@@ -1,7 +1,7 @@
 package ch.unil.sparql.template;
 
-import ch.unil.sparql.template.bean.Country;
-import ch.unil.sparql.template.bean.Person;
+import ch.unil.sparql.template.bean.dbpedia.Country;
+import ch.unil.sparql.template.bean.dbpedia.Person;
 import ch.unil.sparql.template.query.SparqlQueryService;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.junit.Test;

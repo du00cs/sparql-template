@@ -6,7 +6,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.apache.jena" level="DEBUG"/>
+    <logger name="org.apache.jena.fuseki" level="INFO"/>
     <logger name="ch.unil.sparql.template" level="DEBUG"/>
 
     <root level="INFO">

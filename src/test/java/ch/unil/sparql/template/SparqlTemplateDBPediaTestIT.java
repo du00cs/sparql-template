@@ -1,16 +1,12 @@
 package ch.unil.sparql.template;
 
-import ch.unil.sparql.template.bean.Actor;
-import ch.unil.sparql.template.bean.Film;
-import ch.unil.sparql.template.bean.Person;
-import org.assertj.core.api.Assertions;
+import ch.unil.sparql.template.bean.dbpedia.Actor;
+import ch.unil.sparql.template.bean.dbpedia.Film;
+import ch.unil.sparql.template.bean.dbpedia.Person;
 import org.junit.Test;
 
 import java.net.URL;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -20,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author gushakov
  */
-public class SparqlTemplateTestIT {
+public class SparqlTemplateDBPediaTestIT {
 
     @Test
     public void testReadMe() throws Exception {

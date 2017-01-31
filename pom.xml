@@ -45,12 +45,24 @@
             <version>1.6.3</version>
         </dependency>
 
+        <!--
+         ==============
+         RUNTIME
+         ==============
+         -->
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.2</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!--
+         ==============
+         TEST
+         ==============
+         -->
 
         <dependency>
             <groupId>org.apache.jena</groupId>
@@ -85,6 +97,25 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>build.fuseki.embedded.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.8</source>
@@ -109,6 +140,9 @@
                         <configuration>
                             <skipITs>${skipITs}</skipITs>
                             <skipAfterFailureCount>1</skipAfterFailureCount>
+                            <environmentVariables>
+                                <fuseki.embedded.http.port>${build.fuseki.embedded.http.port}</fuseki.embedded.http.port>
+                            </environmentVariables>
                         </configuration>
                     </execution>
                     <execution>
