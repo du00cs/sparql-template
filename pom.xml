@@ -141,7 +141,8 @@
                             <skipITs>${skipITs}</skipITs>
                             <skipAfterFailureCount>1</skipAfterFailureCount>
                             <environmentVariables>
-                                <fuseki.embedded.http.port>${build.fuseki.embedded.http.port}</fuseki.embedded.http.port>
+                                <fuseki.embedded.http.port>${build.fuseki.embedded.http.port}
+                                </fuseki.embedded.http.port>
                             </environmentVariables>
                         </configuration>
                     </execution>
@@ -151,6 +152,25 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.12</version>
+                <configuration>
+                    <dryRun>true</dryRun>
+                    <licenseName>afl_v3_0</licenseName>
+                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>
