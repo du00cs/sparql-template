@@ -25,7 +25,6 @@
     <properties>
         <skipTests>false</skipTests>
         <skipITs>false</skipITs>
-        <license.goal>check</license.goal>
     </properties>
 
     <dependencies>
@@ -109,16 +108,6 @@
 
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>with-licence</id>
-            <properties>
-                <license.goal>format</license.goal>
-            </properties>
-        </profile>
-    </profiles>
-
-
     <build>
         <plugins>
             <plugin>
@@ -191,19 +180,12 @@
                     </properties>
                     <excludes>
                         <exclude>**/README</exclude>
+                        <exclude>**/.*</exclude>
+                        <exclude>src/etc/**</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                     </excludes>
-                    <failIfMissing>false</failIfMissing>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>${license.goal}</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
