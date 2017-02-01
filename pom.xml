@@ -7,10 +7,25 @@
     <groupId>ch.unil</groupId>
     <artifactId>sparql-template</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>sparql-template</name>
+
+    <description>
+        <![CDATA[
+        Client library for loading a set of triples from a SPARQL endpoint of an RDF store with automatic conversion
+        to annotated POJOs.
+        ]]>
+    </description>
+
+    <developers>
+        <developer>
+            <name>George Ushakov</name>
+        </developer>
+    </developers>
 
     <properties>
         <skipTests>false</skipTests>
         <skipITs>false</skipITs>
+        <license.goal>check</license.goal>
     </properties>
 
     <dependencies>
@@ -94,6 +109,16 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>with-licence</id>
+            <properties>
+                <license.goal>format</license.goal>
+            </properties>
+        </profile>
+    </profiles>
+
+
     <build>
         <plugins>
             <plugin>
@@ -156,21 +181,27 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.12</version>
+                <version>3.0</version>
                 <configuration>
-                    <dryRun>true</dryRun>
-                    <licenseName>afl_v3_0</licenseName>
-                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+                    <header>${basedir}/src/etc/license/header.txt</header>
+                    <properties>
+                        <license.url>https://opensource.org/licenses/AFL-3.0</license.url>
+                    </properties>
+                    <excludes>
+                        <exclude>**/README</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                    </excludes>
+                    <failIfMissing>false</failIfMissing>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
                         <phase>process-sources</phase>
+                        <goals>
+                            <goal>${license.goal}</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
