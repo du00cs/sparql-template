@@ -1,6 +1,7 @@
 package ch.unil.sparql.template;
 
 import ch.unil.sparql.template.bean.example.Resource;
+import ch.unil.sparql.template.convert.CustomRdfJavaConverter;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.fuseki.embedded.FusekiEmbeddedServer;
 import org.apache.jena.graph.Graph;
@@ -54,9 +55,10 @@ public class SparqlTemplateFusekiEmbeddedTestIT {
         logger.debug("Started embedded Fuseki server on port " + port);
 
         try {
-            final SparqlTemplate sparqlTemplate = new SparqlTemplate("http://localhost:" + port + "/ds/sparql");
+            final SparqlTemplate sparqlTemplate = new SparqlTemplate("http://localhost:" + port + "/ds/sparql", new CustomRdfJavaConverter());
             final Resource resource = sparqlTemplate.load(EXR_NS + "1", Resource.class);
             assertThat(resource.getName()).isEqualTo("resource one");
+            assertThat(resource.getUuid()).isEqualTo(UUID.fromString("6f18b85c-bcda-4685-924e-7826114c47f3"));
         } finally {
             server.stop();
         }
@@ -64,6 +66,6 @@ public class SparqlTemplateFusekiEmbeddedTestIT {
 
     private void loadSampleData(Graph graph) {
         graph.add(triple(EXR_NS + "1", EXP_NS + "name", "resource one", XSDDatatype.XSDstring));
-        graph.add(triple(EXR_NS + "1", EXP_NS + "uuid", UUID.randomUUID().toString(), XSDDatatype.XSDstring));
+        graph.add(triple(EXR_NS + "1", EXP_NS + "uuid", "6f18b85c-bcda-4685-924e-7826114c47f3", XSDDatatype.XSDstring));
     }
 }

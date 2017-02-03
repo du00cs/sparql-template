@@ -40,6 +40,10 @@ public class SparqlTemplate {
         this(queryService, new ExtendedRdfJavaConverter());
     }
 
+    public SparqlTemplate(String endpoint, RdfJavaConverter rdfJavaConverter) {
+        this(new SparqlQueryService(endpoint, true), rdfJavaConverter);
+    }
+
     public SparqlTemplate(SparqlQueryService queryService, RdfJavaConverter rdfJavaConverter) {
         this.queryService = queryService;
         this.rdfJavaConverter = rdfJavaConverter;

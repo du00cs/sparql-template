@@ -9,8 +9,10 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 
 /**
  * @author gushakov
@@ -21,30 +23,28 @@ public class ExtendedRdfJavaConverter extends DefaultRdfJavaConverter {
         super(Date.class, ZonedDateTime.class, Duration.class, URL.class);
     }
 
+    public ExtendedRdfJavaConverter(Class<?>... customTypes){
+        super(new HashSet<>(Arrays.asList(customTypes)));
+    }
+
     @Override
     protected Object convertLiteralValueToJava(Object literalValue, Class<?> propertyType) {
 
-        // convert dates
-        if (literalValue instanceof XSDDateTime) {
-
+        if (ZonedDateTime.class.isAssignableFrom(propertyType)) {
             final Calendar calendar = ((XSDDateTime) literalValue).asCalendar();
-            if (ZonedDateTime.class.isAssignableFrom(propertyType)) {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()), calendar.getTimeZone().toZoneId());
-            }
-
-            if (Date.class.isAssignableFrom(propertyType)) {
-                return calendar.getTime();
-            }
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()), calendar.getTimeZone().toZoneId());
         }
 
-        // convert duration
-        if (literalValue instanceof XSDDuration) {
-            XSDDuration duration = (XSDDuration) literalValue;
+        if (Date.class.isAssignableFrom(propertyType)) {
+            final Calendar calendar = ((XSDDateTime) literalValue).asCalendar();
+            return calendar.getTime();
+        }
 
+        if (Duration.class.isAssignableFrom(propertyType)){
+           final  XSDDuration duration = (XSDDuration) literalValue;
             if (duration.getYears() != 0 || duration.getMonths() != 0 || duration.getDays() != 0) {
                 throw new IllegalStateException("Only time based duration (hours, minutes, seconds, etc.) can be converted. But was " + duration);
             }
-
             return Duration.parse(literalValue.toString());
         }
 
