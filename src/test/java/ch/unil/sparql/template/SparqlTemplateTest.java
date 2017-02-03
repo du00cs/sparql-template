@@ -12,16 +12,14 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static ch.unil.sparql.template.Prefixes.DBO_NS;
-import static ch.unil.sparql.template.Prefixes.DBP_NS;
-import static ch.unil.sparql.template.Prefixes.DBR;
-import static ch.unil.sparql.template.Prefixes.DBR_NS;
-import static ch.unil.sparql.template.Prefixes.FOAF_NS;
-import static ch.unil.sparql.template.Prefixes.OWL_NS;
-import static ch.unil.sparql.template.Prefixes.RDFS_NS;
 import static ch.unil.sparql.template.Utils.triple;
+import static ch.unil.sparql.template.Vocabulary.DBO_NS;
+import static ch.unil.sparql.template.Vocabulary.DBP_NS;
+import static ch.unil.sparql.template.Vocabulary.DBR_NS;
+import static ch.unil.sparql.template.Vocabulary.FOAF_NS;
+import static ch.unil.sparql.template.Vocabulary.OWL_NS;
+import static ch.unil.sparql.template.Vocabulary.RDFS_NS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.endsWith;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +35,7 @@ public class SparqlTemplateTest {
         // :Angelina_Jolie
         final String personIri = DBR_NS + "Angelina_Jolie";
         final String countryIri = DBR_NS + "Cambodia";
-        when(mockQueryService.query(endsWith("Angelina_Jolie"), any()))
+        when(mockQueryService.query(endsWith("Angelina_Jolie")))
                 .thenReturn(Arrays.asList(
                         triple(personIri, RDFS_NS +"label", "Angelina Jolie", "en"),
                         triple(personIri, RDFS_NS +"label", "Angelina Jolie", "fr"),
@@ -60,13 +58,13 @@ public class SparqlTemplateTest {
                 ));
 
         // :Cambodia
-        when(mockQueryService.query(endsWith("Cambodia"), any()))
+        when(mockQueryService.query(endsWith("Cambodia")))
                 .thenReturn(Collections.singletonList(
                         triple(countryIri, DBP_NS + "commonName", "Cambodia", "en")
                 ));
 
         final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService);
-        final Person person = sparqlTemplate.load(DBR + ":Angelina_Jolie", Person.class);
+        final Person person = sparqlTemplate.load(DBR_NS + "Angelina_Jolie", Person.class);
         assertThat(person instanceof DynamicBeanProxy).isTrue();
         assertThat(person.getBirthName()).isEqualTo("Angelina Jolie Voight");
         assertThat(person.getBirthDate().getYear()).isEqualTo(1975);

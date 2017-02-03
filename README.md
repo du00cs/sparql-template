@@ -28,19 +28,19 @@ We annotate our domain POJO as following.
 public class Person {
 
     // will be mapped from the value of http://dbpedia.org/ontology/birthName
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     private String birthName;
 
     // will be mapped from the value of http://www.w3.org/2000/01/rdf-schema#label for the Russian language
-    @Predicate(value = RDFS, language = "ru")
+    @Predicate(value = RDFS_NS, language = "ru")
     private String label;
 
     // will be mapped from the value of http://dbpedia.org/property/birthDate, automatic conversion to java.time.ZonedDateTime
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     private ZonedDateTime birthDate;
 
     // will be mapped from the values of http://dbpedia.org/property/spouse, lazy load of relationships
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     @Relation
     private Collection<Person> spouse;
 }
@@ -54,7 +54,7 @@ them automatically to the required Java instance.
     final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql");
 
     // load information about Angelina Jolie
-    final Person person = sparqlTemplate.load(DBR + ":Angelina_Jolie", Person.class);
+    final Person person = sparqlTemplate.load(DBR_NS + "Angelina_Jolie", Person.class);
 
     System.out.println(person.getBirthName());
     // Angelina Jolie Voight

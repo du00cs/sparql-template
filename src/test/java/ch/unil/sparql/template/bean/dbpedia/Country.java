@@ -2,9 +2,8 @@ package ch.unil.sparql.template.bean.dbpedia;
 
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Rdf;
-import ch.unil.sparql.template.annotation.Relation;
 
-import static ch.unil.sparql.template.Prefixes.DBP;
+import static ch.unil.sparql.template.Vocabulary.DBP_NS;
 
 /**
  * @author gushakov
@@ -12,7 +11,7 @@ import static ch.unil.sparql.template.Prefixes.DBP;
 @Rdf
 public class Country {
 
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     private String commonName;
 
     public String getCommonName() {

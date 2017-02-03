@@ -2,7 +2,6 @@ package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Relation;
-import org.apache.jena.shared.PrefixMapping;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.AnnotationBasedPersistentProperty;
@@ -22,8 +21,6 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
 
     private SimpleTypeHolder simpleTypeHolder;
 
-    private PrefixMapping prefixMap;
-
     private boolean isTransient;
 
     public RdfProperty(Field field, PropertyDescriptor propertyDescriptor, PersistentEntity<?, RdfProperty> owner, SimpleTypeHolder simpleTypeHolder) {
@@ -31,7 +28,6 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
         this.predicateAnnot = findAnnotation(Predicate.class);
         this.relationAnnot = findAnnotation(Relation.class);
         this.simpleTypeHolder = simpleTypeHolder;
-        this.prefixMap = ((RdfEntity<?>) owner).getPrefixMap();
         this.isTransient = super.isTransient() || !isAnnotationPresent(Predicate.class);
     }
 
@@ -45,13 +41,12 @@ public class RdfProperty extends AnnotationBasedPersistentProperty<RdfProperty> 
         return super.getAssociation();
     }
 
-    public String getPrefix() {
+    public String getNamespace() {
         return predicateAnnot.value();
     }
 
     public String getQName() {
-        return prefixMap.expandPrefix(getPrefix() + ":" +
-                (predicateAnnot.localName().equals(Predicate.DEFAULT_LOCAL_NAME) ? getName() : predicateAnnot.localName()));
+        return predicateAnnot.value() + (predicateAnnot.localName().equals(Predicate.DEFAULT_LOCAL_NAME) ? getName() : predicateAnnot.localName());
     }
 
     public boolean isSimpleProperty() {

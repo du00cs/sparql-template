@@ -8,42 +8,46 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 
-import static ch.unil.sparql.template.Prefixes.*;
+import static ch.unil.sparql.template.Vocabulary.DBO_NS;
+import static ch.unil.sparql.template.Vocabulary.DBP_NS;
+import static ch.unil.sparql.template.Vocabulary.FOAF_NS;
+import static ch.unil.sparql.template.Vocabulary.OWL_NS;
+import static ch.unil.sparql.template.Vocabulary.RDFS_NS;
 
 
 @Rdf
 public class Person {
 
-    @Predicate(value = RDFS, language = "ru")
+    @Predicate(value = RDFS_NS, language = "ru")
     private String label;
 
-    @Predicate(value = RDFS, localName = "label")
+    @Predicate(value = RDFS_NS, localName = "label")
     private Collection<String> allLabels;
 
-    @Predicate(OWL)
+    @Predicate(OWL_NS)
     private Collection<String> sameAs;
 
-    @Predicate(value = OWL, localName = "sameAs")
+    @Predicate(value = OWL_NS, localName = "sameAs")
     private Collection<URL> sameAsUrl;
 
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     private String birthName;
 
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     private ZonedDateTime birthDate;
 
-    @Predicate(value = DBP, localName = "spouse")
+    @Predicate(value = DBP_NS, localName = "spouse")
     private Collection<Integer> yearsMarried;
 
-    @Predicate(DBO)
+    @Predicate(DBO_NS)
     @Relation
     private Country citizenship;
 
-    @Predicate(DBP)
+    @Predicate(DBP_NS)
     @Relation
     private Collection<Person> spouse;
 
-    @Predicate(FOAF)
+    @Predicate(FOAF_NS)
     private String homepage;
 
     public String getLabel() {

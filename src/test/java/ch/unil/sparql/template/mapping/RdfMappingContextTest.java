@@ -1,21 +1,16 @@
 package ch.unil.sparql.template.mapping;
 
-import ch.unil.sparql.template.Utils;
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Rdf;
 import ch.unil.sparql.template.annotation.Relation;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.jena.shared.PrefixMapping;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
-import static ch.unil.sparql.template.Prefixes.DBP;
+import static ch.unil.sparql.template.Vocabulary.DBP_NS;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 /**
@@ -27,18 +22,10 @@ public class RdfMappingContextTest {
     private static class Person1 {
     }
 
-    @Rdf({"foo", "http://foobar/", "wam"})
-    private static class Person2 {
-    }
-
-    @Rdf({"foo"})
-    private static class Person3 {
-    }
-
     @Rdf
     private static class Person4 {
 
-        @Predicate(DBP)
+        @Predicate(DBP_NS)
         private String birthName;
     }
 
@@ -67,7 +54,7 @@ public class RdfMappingContextTest {
     @Rdf
     private static class Person7 {
 
-        @Predicate(DBP)
+        @Predicate(DBP_NS)
         private Collection<Integer> spouse;
 
     }
@@ -88,48 +75,12 @@ public class RdfMappingContextTest {
     }
 
     @Test
-    public void testDefaultPrefixMap() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity entity = mappingContext.getPersistentEntity(Person1.class);
-        final PrefixMapping prefixMap = entity.getPrefixMap();
-        final Map<String, String> defaultPrefixMap = Utils.defaultPrefixMap().getNsPrefixMap();
-        assertThat(prefixMap.getNsPrefixMap()).containsKeys(defaultPrefixMap.keySet().toArray(new String[defaultPrefixMap.size()]));
-    }
-
-    @Test
-    public void testCustomPrefixMap() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity entity = mappingContext.getPersistentEntity(Person2.class);
-        final PrefixMapping prefixMap = entity.getPrefixMap();
-        assertThat(prefixMap.getNsPrefixMap())
-                .containsKeys("foo")
-                .containsValues("http://foobar/")
-        ;
-    }
-
-    @Test
-    public void testInvalidPrefixMap() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext();
-        final RdfEntity entity = mappingContext.getPersistentEntity(Person3.class);
-        final PrefixMapping prefixMap = entity.getPrefixMap();
-        assertThat(prefixMap.getNsPrefixMap()).doesNotContainKeys("foo");
-    }
-
-    @Test
-    public void testPredicatePrefix() throws Exception {
+    public void testPredicateNamespace() throws Exception {
         final RdfMappingContext mappingContext = new RdfMappingContext();
         final RdfEntity entity = mappingContext.getPersistentEntity(Person4.class);
         final RdfProperty birthNameProperty = (RdfProperty) entity.getPersistentProperty("birthName");
         assertThat(birthNameProperty).isNotNull();
-        assertThat(birthNameProperty.getPrefix()).isEqualTo(DBP);
-    }
-
-    @Test
-    public void testInitializePrefixMap() throws Exception {
-        final RdfMappingContext mappingContext = new RdfMappingContext(Utils.defaultPrefixMap()
-                .setNsPrefixes(Collections.singletonMap("foo", "http://foobar")));
-        final RdfEntity entity = mappingContext.getPersistentEntity(Person5.class);
-        assertThat(entity.getPrefixMap().getNsPrefixMap()).contains(new MutablePair<>("foo", "http://foobar"));
+        assertThat(birthNameProperty.getNamespace()).isEqualTo(DBP_NS);
     }
 
     @Test

@@ -13,7 +13,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.shared.PrefixMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.Association;
@@ -32,27 +31,19 @@ public class SparqlTemplate {
     private RdfJavaConverter rdfJavaConverter;
     private RdfMappingContext mappingContext;
 
-    public SparqlTemplate(String endpoint) {
-        this(new SparqlQueryService(endpoint, true), Collections.emptyMap(), new ExtendedRdfJavaConverter());
-    }
 
-    public SparqlTemplate(String endpoint, Map<String, String> prefixMap) {
-        this(new SparqlQueryService(endpoint, true), prefixMap, new ExtendedRdfJavaConverter());
+    public SparqlTemplate(String endpoint) {
+        this(new SparqlQueryService(endpoint, true), new ExtendedRdfJavaConverter());
     }
 
     public SparqlTemplate(SparqlQueryService queryService) {
-        this(queryService, Collections.emptyMap(), new ExtendedRdfJavaConverter());
+        this(queryService, new ExtendedRdfJavaConverter());
     }
 
-    public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap) {
-        this(queryService, prefixMap, new ExtendedRdfJavaConverter());
-    }
-
-    public SparqlTemplate(SparqlQueryService queryService, Map<String, String> prefixMap, RdfJavaConverter rdfJavaConverter) {
+    public SparqlTemplate(SparqlQueryService queryService, RdfJavaConverter rdfJavaConverter) {
         this.queryService = queryService;
         this.rdfJavaConverter = rdfJavaConverter;
-        mappingContext = new RdfMappingContext(Utils.defaultPrefixMap().setNsPrefixes(prefixMap),
-                rdfJavaConverter.getCustomTypes());
+        mappingContext = new RdfMappingContext(rdfJavaConverter.getCustomTypes());
     }
 
     public <T> T load(String iri, Class<T> type) {
@@ -69,7 +60,7 @@ public class SparqlTemplate {
         final PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
 
         // query SPARQL endpoint for the set of all triples matching the subject IRI
-        final Collection<Triple> triples = queryService.query(iri, entity.getPrefixMap());
+        final Collection<Triple> triples = queryService.query(iri);
 
         logger.debug("SPARQL query returned " + triples.size() + " triples");
 
@@ -103,7 +94,7 @@ public class SparqlTemplate {
     private void loadSimpleProperty(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
                                     PersistentPropertyAccessor propertyAccessor) {
         // get all triples where the predicate matches the property
-        final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty, entity.getPrefixMap());
+        final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty);
 
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() == 0) {
@@ -123,7 +114,7 @@ public class SparqlTemplate {
         final RdfProperty inverseProperty = association.getInverse();
 
         // get all triples where the predicate matches the property
-        final Collection<Triple> matchingTriples = filterForProperty(triples, inverseProperty, entity.getPrefixMap());
+        final Collection<Triple> matchingTriples = filterForProperty(triples, inverseProperty);
 
         // there must be exactly one triple with matching predicate
         if (matchingTriples.size() != 1) {
@@ -139,7 +130,7 @@ public class SparqlTemplate {
     private void loadCollectionOfSimpleProperties(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
                                                   PersistentPropertyAccessor propertyAccessor) {
 
-        final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty, entity.getPrefixMap());
+        final Collection<Triple> matchingTriples = filterForProperty(triples, rdfProperty);
 
         final List<Object> listOfValues = new ArrayList<>();
 
@@ -164,7 +155,7 @@ public class SparqlTemplate {
         final RdfProperty inverseProperty = association.getInverse();
 
         // get all triples where the predicate matches the property
-        final Collection<Triple> matchingTriples = filterForProperty(triples, inverseProperty, entity.getPrefixMap());
+        final Collection<Triple> matchingTriples = filterForProperty(triples, inverseProperty);
 
         final Set<DynamicBeanProxy> proxies = new HashSet<>();
 
@@ -192,9 +183,9 @@ public class SparqlTemplate {
         }
     }
 
-    private Collection<Triple> filterForProperty(Collection<Triple> triples, RdfProperty rdfProperty, final PrefixMapping prefixMap) {
+    private Collection<Triple> filterForProperty(Collection<Triple> triples, RdfProperty rdfProperty) {
         return CollectionUtils.select(triples, triple -> {
-                    final String predicateUri = prefixMap.expandPrefix(triple.getPredicate().getURI());
+                    final String predicateUri = triple.getPredicate().getURI();
 
                     // match qualified name of property to predicate URI
                     if (predicateUri.equals(rdfProperty.getQName())) {

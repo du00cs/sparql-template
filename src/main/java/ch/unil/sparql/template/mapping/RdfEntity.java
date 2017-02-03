@@ -2,8 +2,6 @@ package ch.unil.sparql.template.mapping;
 
 import ch.unil.sparql.template.annotation.Rdf;
 import ch.unil.sparql.template.convert.RdfJavaConverter;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.jena.shared.PrefixMapping;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimpleAssociationHandler;
@@ -13,7 +11,6 @@ import org.springframework.data.util.TypeInformation;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -23,9 +20,7 @@ import java.util.Optional;
 public class RdfEntity<T> extends BasicPersistentEntity<T, RdfProperty> {
     private Rdf annot;
 
-    private PrefixMapping prefixMap;
-
-    public RdfEntity(TypeInformation<T> information, PrefixMapping prefixMap) {
+    public RdfEntity(TypeInformation<T> information) {
         super(information);
         this.annot = findAnnotation(Rdf.class);
 
@@ -35,13 +30,6 @@ public class RdfEntity<T> extends BasicPersistentEntity<T, RdfProperty> {
                     RdfJavaConverter.class.getSimpleName() + ".");
         }
 
-        // add any prefix mappings declared with this entity
-        prefixMap.setNsPrefixes(MapUtils.putAll(new HashMap<>(), annot.value()));
-        this.prefixMap = prefixMap;
-    }
-
-    public PrefixMapping getPrefixMap() {
-        return prefixMap;
     }
 
     public Optional<PersistentProperty<?>> findPropertyForGetter(Method method) {

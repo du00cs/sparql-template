@@ -1,11 +1,13 @@
 package ch.unil.sparql.template.bean.dbpedia;
 
-import ch.unil.sparql.template.Prefixes;
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Rdf;
 import ch.unil.sparql.template.annotation.Relation;
 
 import java.util.Collection;
+
+import static ch.unil.sparql.template.Vocabulary.DBP_NS;
+import static ch.unil.sparql.template.Vocabulary.DBR_NS;
 
 /**
  * @author gushakov
@@ -13,10 +15,10 @@ import java.util.Collection;
 @Rdf
 public class Film {
 
-    @Predicate(Prefixes.DBR)
+    @Predicate(DBR_NS)
     private String name;
 
-    @Predicate(Prefixes.DBP)
+    @Predicate(DBP_NS)
     @Relation
     private Collection<Actor> starring;
 

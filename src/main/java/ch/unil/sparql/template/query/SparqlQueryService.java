@@ -11,7 +11,6 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.shared.PrefixMapping;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -46,10 +45,10 @@ public class SparqlQueryService {
         this.httpClient = httpClientBuilder.build();
     }
 
-    public Collection<Triple> query(String subjectIri, PrefixMapping prefixMap) {
+    public Collection<Triple> query(String subjectIri) {
         List<Triple> triples = new ArrayList<>();
         try (final QueryExecution queryExec = QueryExecutionFactory.sparqlService(endpoint,
-                "SELECT * WHERE { <" + prefixMap.expandPrefix(subjectIri) + "> ?p ?o }", httpClient)) {
+                "SELECT * WHERE { <" + subjectIri + "> ?p ?o }", httpClient)) {
             final ResultSet resultSet = queryExec.execSelect();
             while (resultSet.hasNext()) {
                 final QuerySolution querySolution = resultSet.next();

@@ -3,8 +3,8 @@ package ch.unil.sparql.template.bean.bnb;
 import ch.unil.sparql.template.annotation.Predicate;
 import ch.unil.sparql.template.annotation.Rdf;
 
-import static ch.unil.sparql.template.TestPrefixes.IFE;
-import static ch.unil.sparql.template.TestPrefixes.PLT;
+import static ch.unil.sparql.template.Vocabulary.IFE_NS;
+import static ch.unil.sparql.template.Vocabulary.PLT_NS;
 
 /**
  * @author gushakov
@@ -12,10 +12,10 @@ import static ch.unil.sparql.template.TestPrefixes.PLT;
 @Rdf
 public class Publication {
 
-    @Predicate(PLT)
+    @Predicate(PLT_NS)
     private String title;
 
-    @Predicate(value = IFE, localName = "P1053", language = "en")
+    @Predicate(value = IFE_NS, localName = "P1053", language = "en")
     private String pages;
 
     public String getTitle() {

@@ -1,7 +1,5 @@
 package ch.unil.sparql.template.mapping;
 
-import ch.unil.sparql.template.Utils;
-import org.apache.jena.shared.PrefixMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -22,22 +20,11 @@ import java.util.Set;
 public class RdfMappingContext extends AbstractMappingContext<RdfEntity<?>, RdfProperty> {
     private static final Logger logger = LoggerFactory.getLogger(RdfMappingContext.class);
 
-    private PrefixMapping prefixMap;
-
-    public RdfMappingContext() {
-        this(Utils.defaultPrefixMap(), null);
-    }
-
-    public RdfMappingContext(PrefixMapping prefixMap) {
-        this(prefixMap, null);
-    }
-
     public RdfMappingContext(Class<?>... customTypes){
-        this(Utils.defaultPrefixMap(), new HashSet<>(Arrays.asList(customTypes)));
+        this(new HashSet<>(Arrays.asList(customTypes)));
     }
 
-    public RdfMappingContext(PrefixMapping prefixMap, Set<Class<?>> customTypes) {
-        this.prefixMap = prefixMap;
+    public RdfMappingContext(Set<Class<?>> customTypes) {
         if (customTypes != null) {
             setSimpleTypeHolder(new SimpleTypeHolder(customTypes, true));
         }
@@ -45,7 +32,7 @@ public class RdfMappingContext extends AbstractMappingContext<RdfEntity<?>, RdfP
 
     @Override
     protected <T> RdfEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
-        final RdfEntity<T> entity = new RdfEntity<>(typeInformation, prefixMap);
+        final RdfEntity<T> entity = new RdfEntity<>(typeInformation);
         logger.debug("Created RDF entity for type {}", typeInformation.getType().getSimpleName());
         return entity;
     }

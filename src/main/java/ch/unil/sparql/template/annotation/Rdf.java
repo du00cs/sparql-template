@@ -14,5 +14,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Persistent
 public @interface Rdf {
-    String[] value() default {};
 }

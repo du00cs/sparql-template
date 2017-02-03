@@ -6,18 +6,16 @@ import org.apache.jena.fuseki.embedded.FusekiEmbeddedServer;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.junit.*;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ServerSocket;
 import java.util.UUID;
 
-import static ch.unil.sparql.template.TestPrefixes.EXP_NS;
-import static ch.unil.sparql.template.TestPrefixes.EXR;
-import static ch.unil.sparql.template.TestPrefixes.EXR_NS;
-import static ch.unil.sparql.template.TestPrefixes.TEST_PREFIXES;
 import static ch.unil.sparql.template.Utils.triple;
+import static ch.unil.sparql.template.Vocabulary.EXP_NS;
+import static ch.unil.sparql.template.Vocabulary.EXR_NS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // code based on example from http://jena.apache.org/documentation/fuseki2/fuseki-embedded.html#example-1
@@ -56,8 +54,8 @@ public class SparqlTemplateFusekiEmbeddedTestIT {
         logger.debug("Started embedded Fuseki server on port " + port);
 
         try {
-            final SparqlTemplate sparqlTemplate = new SparqlTemplate("http://localhost:" + port + "/ds/sparql", TEST_PREFIXES);
-            final Resource resource = sparqlTemplate.load(EXR + ":1", Resource.class);
+            final SparqlTemplate sparqlTemplate = new SparqlTemplate("http://localhost:" + port + "/ds/sparql");
+            final Resource resource = sparqlTemplate.load(EXR_NS + "1", Resource.class);
             assertThat(resource.getName()).isEqualTo("resource one");
         } finally {
             server.stop();
