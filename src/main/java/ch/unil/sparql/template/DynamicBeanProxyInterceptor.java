@@ -29,9 +29,7 @@ public class DynamicBeanProxyInterceptor<S, T> {
 
     private SparqlTemplate sparqlTemplate;
 
-    private PersistentPropertyAccessor propertyAccessor;
-
-    public DynamicBeanProxyInterceptor(String iri, Class<T> beanType, RdfEntity<?> entity, SparqlTemplate sparqlTemplate) {
+    DynamicBeanProxyInterceptor(String iri, Class<T> beanType, RdfEntity<?> entity, SparqlTemplate sparqlTemplate) {
         this.iri = iri;
         this.beanType = beanType;
         this.entity = entity;
@@ -52,6 +50,8 @@ public class DynamicBeanProxyInterceptor<S, T> {
 
         // find a property corresponding to the getter
         final Optional<PersistentProperty<?>> getterPropertyOptional = entity.findPropertyForGetter(getter);
+
+        final PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
 
         // if there is no matching property, try to find an association corresponding to the getter
         if (!getterPropertyOptional.isPresent()) {
@@ -85,7 +85,7 @@ public class DynamicBeanProxyInterceptor<S, T> {
             }
 
             // load and process properties
-            propertyAccessor = sparqlTemplate.loadProperties(iri, bean);
+            sparqlTemplate.loadProperties(iri, bean);
         }
     }
 

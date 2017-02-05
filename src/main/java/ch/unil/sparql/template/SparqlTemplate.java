@@ -6,11 +6,15 @@ import ch.unil.sparql.template.mapping.RdfEntity;
 import ch.unil.sparql.template.mapping.RdfMappingContext;
 import ch.unil.sparql.template.mapping.RdfProperty;
 import ch.unil.sparql.template.query.SparqlQueryService;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.slf4j.Logger;
@@ -19,6 +23,8 @@ import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author gushakov
@@ -30,6 +36,8 @@ public class SparqlTemplate {
     private SparqlQueryService queryService;
     private RdfJavaConverter rdfJavaConverter;
     private RdfMappingContext mappingContext;
+
+    private LoadingCache<Pair<String, Class<?>>, Object> cache;
 
 
     public SparqlTemplate(String endpoint) {
@@ -48,18 +56,27 @@ public class SparqlTemplate {
         this.queryService = queryService;
         this.rdfJavaConverter = rdfJavaConverter;
         mappingContext = new RdfMappingContext(rdfJavaConverter.getCustomTypes());
+        cache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<Pair<String, Class<?>>, Object>() {
+                    @Override
+                    public Object load(Pair<String, Class<?>> pair) throws Exception {
+                        return SparqlTemplate.this.createDynamicProxy(pair.getLeft(),
+                                pair.getRight(), mappingContext.getPersistentEntity(pair.getRight()));
+                    }
+                });
     }
 
-    public <T> T load(String iri, Class<T> type) {
-        return load(null, null, iri, type);
+    <T> T load(String iri, Class<T> type){
+        try {
+            return type.cast(cache.get(Pair.of(iri, type)));
+        } catch (ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    private <S, T> T load(S fromBean, RdfProperty fromProperty, String iri, Class<T> type) {
-        RdfEntity<?> entity = mappingContext.getPersistentEntity(type);
-        return createDynamicProxy(fromBean, fromProperty, iri, type, entity);
-    }
-
-    <T> PersistentPropertyAccessor loadProperties(String iri, T bean) {
+    <T> void loadProperties(String iri, T bean) {
         final RdfEntity<?> entity = mappingContext.getPersistentEntity(bean.getClass());
         final PersistentPropertyAccessor propertyAccessor = entity.getPropertyAccessor(bean);
 
@@ -92,7 +109,6 @@ public class SparqlTemplate {
 
         });
 
-        return propertyAccessor;
     }
 
     private void loadSimpleProperty(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
@@ -128,7 +144,7 @@ public class SparqlTemplate {
         final Triple triple = matchingTriples.iterator().next();
         final Node objectNode = triple.getObject();
 
-        propertyAccessor.setProperty(inverseProperty, load(this, inverseProperty, objectNode.getURI(), inverseProperty.getType()));
+        propertyAccessor.setProperty(inverseProperty, load(objectNode.getURI(), inverseProperty.getType()));
     }
 
     private void loadCollectionOfSimpleProperties(String iri, Collection<Triple> triples, RdfEntity<?> entity, RdfProperty rdfProperty,
@@ -164,13 +180,13 @@ public class SparqlTemplate {
         final Set<DynamicBeanProxy> proxies = new HashSet<>();
 
         for (final Triple triple : matchingTriples) {
-            proxies.add((DynamicBeanProxy) load(this, inverseProperty, triple.getObject().getURI(), inverseProperty.getActualType()));
+            proxies.add((DynamicBeanProxy) load(triple.getObject().getURI(), inverseProperty.getActualType()));
         }
 
         propertyAccessor.setProperty(inverseProperty, proxies);
     }
 
-    private <S, T> T createDynamicProxy(S fromBean, RdfProperty fromProperty, String iri, Class<T> beanType, RdfEntity<?> entity) {
+    private <S, T> T createDynamicProxy(String iri, Class<T> beanType, RdfEntity<?> entity) {
         try {
             return new ByteBuddy()
                     .subclass(beanType)

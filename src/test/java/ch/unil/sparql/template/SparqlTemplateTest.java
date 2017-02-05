@@ -1,5 +1,7 @@
 package ch.unil.sparql.template;
 
+import ch.unil.sparql.template.annotation.Predicate;
+import ch.unil.sparql.template.annotation.Rdf;
 import ch.unil.sparql.template.bean.dbpedia.Country;
 import ch.unil.sparql.template.bean.dbpedia.Person;
 import ch.unil.sparql.template.query.SparqlQueryService;
@@ -20,13 +22,27 @@ import static ch.unil.sparql.template.Vocabulary.FOAF_NS;
 import static ch.unil.sparql.template.Vocabulary.OWL_NS;
 import static ch.unil.sparql.template.Vocabulary.RDFS_NS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.endsWith;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author gushakov
  */
 public class SparqlTemplateTest {
+
+    @Rdf
+    public static class Simple {
+
+        @Predicate
+        private String p;
+
+        public String getP() {
+            return p;
+        }
+    }
 
     @Test
     public void testLoad() throws Exception {
@@ -84,4 +100,17 @@ public class SparqlTemplateTest {
                 new URL("http://yago-knowledge.org/resource/Angelina_Jolie"));
     }
 
+    @Test
+    public void testLoadFromCache() throws Exception {
+        final SparqlQueryService mockQueryService = Mockito.mock(SparqlQueryService.class);
+        when(mockQueryService.query(anyString())).thenReturn(
+                Collections.singleton(triple("s", "p", "o", XSDDatatype.XSDstring)));
+        final SparqlTemplate sparqlTemplate = new SparqlTemplate(mockQueryService);
+        final Simple first = sparqlTemplate.load("s", Simple.class);
+        assertThat(first.getP()).isEqualTo("o");
+        final Simple second = sparqlTemplate.load("s", Simple.class);
+        assertThat(second.getP()).isEqualTo("o");
+        verify(mockQueryService, times(1)).query(anyString());
+
+    }
 }
