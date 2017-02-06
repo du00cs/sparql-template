@@ -79,4 +79,17 @@ public class SparqlTemplateDBPediaTestIT {
         film.getStarring().forEach(a -> System.out.println(a.getBirthName()));
     }
 
+    @Test
+    public void testCache() throws Exception {
+        final SparqlTemplate sparqlTemplate = new SparqlTemplate("https://dbpedia.org/sparql");
+        final Person person1 = sparqlTemplate.load(DBR_NS + "Angelina_Jolie", Person.class);
+        final Person person2 = person1.getSpouse().stream()
+                .filter(p -> ((DynamicBeanProxy) p).__getIri().contains("Pitt"))
+                .findAny().get();
+        final Person person3 = person2.getSpouse().stream()
+                .filter(p -> ((DynamicBeanProxy) p).__getIri().contains("Jolie"))
+                .findAny().get();
+        assertThat(person1).isEqualTo(person3);
+    }
+
 }
